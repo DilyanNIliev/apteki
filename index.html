@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Аптеки във Варна</title>
+<style>
+  :root { --bg:#f5f8f6; --card:#fff; --text:#1c2b24; --muted:#5f6f67; --accent:#0a8f5b; --line:#dde6e1; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111915; --card:#1a251f; --text:#e6efe9; --muted:#9db0a5; --accent:#3ccf91; --line:#2a3a31; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  header, main, footer { max-width:960px; margin:0 auto; padding:16px; }
+  h1 { margin:8px 0 4px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  input[type=search] { flex:1; min-width:200px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--text); font:inherit; }
+  label { display:flex; gap:6px; align-items:center; }
+  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .card h2 { font-size:1.1rem; margin:0 0 6px; }
+  .badge { display:inline-block; font-size:.75rem; background:var(--accent); color:#fff; border-radius:99px; padding:1px 8px; margin-left:6px; vertical-align:middle; }
+  .row { margin:4px 0; color:var(--muted); }
+  .row b { color:var(--text); font-weight:600; }
+  .links { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+  a { color:var(--accent); }
+  .note { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:10px 14px; color:var(--muted); }
+  footer { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Аптеки във Варна</h1>
+  <p class="sub">Работно време, телефон, Google Maps и уебсайт.</p>
+  <div class="note">В списъка са аптеките, чиито данни успях да потвърдя в публични справочници. Във Варна има около 200 аптеки – пълния списък виж в
+    <a href="https://moiteapteki.bg/apteki/varna/" target="_blank" rel="noopener">moiteapteki.bg</a>.
+    Часовете може да са се променили – обади се преди посещение. „—“ означава, че данните не са потвърдени.</div>
+</header>
+<main>
+  <div class="controls">
+    <input type="search" id="q" placeholder="Търси по име или адрес…" aria-label="Търсене">
+    <label><input type="checkbox" id="h24"> Само денонощни</label>
+  </div>
+  <div class="grid" id="list"></div>
+</main>
+<footer>Източници: moiteapteki.bg, varna24.bg, framar.bg, aptekavarna.com, сайтове на мол центрове.</footer>
+<script>
+const pharmacies = [
+  { name:"Аптека Окръжна (Валя Дечева)", address:"бул. Цар Освободител 77А", phone:"052 612 008", hours:"Денонощно", h24:true, website:"https://aptekavarna.com/" },
+  { name:"Аптека Живита", address:"бул. Владислав Варненчик 65", phone:"052 607 033", hours:"Денонощно", h24:true },
+  { name:"Санита 98", address:"бул. Владислав Варненчик 12", phone:"052 825 205 / 0888 604 119", hours:"Денонощно", h24:true },
+  { name:"Санита", address:"бул. Генерал Колев 72", hours:"Денонощно", h24:true },
+  { name:"Фармедия", address:"кв. Чайка, бл. 204", hours:"Денонощно", h24:true },
+  { name:"Аптека Попова", address:"ул. 27-ми Юли 16", phone:"052 616 050", hours:"Пн–Пт 9:00–20:00, Сб 10:00–19:00, Нд 10:00–18:00" },
+  { name:"Subra – МОЛ Варна", address:"бул. Владислав Варненчик 186", phone:"052 576 716", hours:"Всеки ден 10:00–22:00" },
+  { name:"Subra – Grand Mall Varna", address:"ул. Андрей Сахаров 2", phone:"0885 280 933", hours:"Всеки ден 10:00–22:00", website:"https://www.grandmall-varna.com/bg/99/apteka/subra" },
+  { name:"Subra – Delta Planet Mall", address:"бул. Сливница 185", phone:"0878 588 624" }
+];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function render() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const only24 = document.getElementById('h24').checked;
+  const items = pharmacies.filter(p => (!only24 || p.h24) && (p.name + ' ' + p.address).toLowerCase().includes(q));
+  document.getElementById('list').innerHTML = items.length ? items.map(p => {
+    const map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ', ' + p.address + ', Варна');
+    return `<article class="card">
+      <h2>${esc(p.name)}${p.h24 ? '<span class="badge">24ч</span>' : ''}</h2>
+      <div class="row"><b>Адрес:</b> ${esc(p.address)}, Варна</div>
+      <div class="row"><b>Работно време:</b> ${esc(p.hours || '—')}</div>
+      <div class="row"><b>Телефон:</b> ${p.phone ? `<a href="tel:${esc(p.phone.split('/')[0].replace(/\s/g,''))}">${esc(p.phone)}</a>` : '—'}</div>
+      <div class="links">
+        <a href="${map}" target="_blank" rel="noopener">Google Maps</a>
+        ${p.website ? `<a href="${esc(p.website)}" target="_blank" rel="noopener">Уебсайт</a>` : '<span class="row">Уебсайт: —</span>'}
+      </div></article>`;
+  }).join('') : '<p>Няма резултати.</p>';
+}
+document.getElementById('q').addEventListener('input', render);
+document.getElementById('h24').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
