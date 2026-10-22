@@ -56,6 +56,7 @@
   </div>
   <p id="status" role="status"></p>
   <div class="grid" id="list"></div>
+  <p class="note">Списъкът се зарежда от OpenStreetMap и не съвпада напълно с Google – липсващите аптеки и часове ще бъдат допълнени.</p>
   <p class="note">Работното време може да се е променило – обади се преди посещение. „—“ означава непотвърдени данни; такива аптеки не попадат във филтрите „Работят сега“, „Приготвят лекарства“ и „Работят на празници“.</p>
 </main>
 <script>
@@ -78,6 +79,85 @@ const pharmacies = [
 
 const DAYS = ["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
 const toMin = t => { const [h,m] = t.split(":").map(Number); return h*60+m; };
+// p.days: { 0..6: [[отваряне_мин, затваряне_мин], …] } – липсващ ден = затворено
+for (const p of pharmacies) {
+  if (!p.sched) continue;
+  p.days = {};
+  for (const [ds,o,c] of p.sched) for (const d of ds) p.days[d] = [[toMin(o), toMin(c)]];
+}
+
+// ---- OpenStreetMap: всички аптеки във Варна, зареждани в браузъра ----
+const OH = {Su:0,Mo:1,Tu:2,We:3,Th:4,Fr:5,Sa:6};
+function parseOH(str) {
+  const s = str.trim();
+  if (s === "24/7") return { h24:true, holiday:true };
+  const days = {}, res = {};
+  for (const raw of s.split(";")) {
+    const m = raw.trim().match(/^([A-Za-z,\- ]*?)\s*((?:\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}\s*,?\s*)+|off|closed)?$/);
+    if (!raw.trim()) continue;
+    if (!m) return null;
+    const spec = m[1].replace(/\s/g, ""), body = m[2];
+    const iv = !body || /^(off|closed)$/.test(body) ? [] : body.split(",").map(x => {
+      const [o,c] = x.trim().split("-").map(t => toMin(t.trim()));
+      return [o, c <= o ? 1440 : c];
+    });
+    if (!body && spec) return null;
+    const target = [];
+    if (!spec) target.push(0,1,2,3,4,5,6);
+    for (const part of spec.split(",").filter(Boolean)) {
+      if (part === "PH") { res.holiday = iv.length > 0; continue; }
+      const [a,b] = part.split("-");
+      if (!(a in OH) || (b && !(b in OH))) return null;
+      let d = OH[a]; target.push(d);
+      while (b && d !== OH[b]) { d = (d + 1) % 7; target.push(d); }
+    }
+    for (const d of target) days[d] = iv;
+  }
+  if (!Object.keys(days).length) return null;
+  res.days = days;
+  return res;
+}
+const digits = s => (s || "").replace(/\D/g, "").replace(/^(00)?359/, "0");
+const addrKey = s => (s || "").toLowerCase().replace(/бул\.|ул\.|булевард|улица|[^а-я0-9]/g, "");
+function fromOSM(el) {
+  const t = el.tags || {}, c = el.center || el;
+  const street = t["addr:street"] ? t["addr:street"] + (t["addr:housenumber"] ? " " + t["addr:housenumber"] : "") : "";
+  const p = {
+    name: t.name || t["name:bg"] || t.brand || t.operator || "Аптека",
+    address: street || t["addr:place"] || t["addr:suburb"] || "адресът не е посочен в OpenStreetMap",
+    phone: t.phone || t["contact:phone"],
+    website: t.website || t["contact:website"],
+    coord: [c.lat, c.lon], osm: true
+  };
+  if (p.website && !/^https?:\/\//.test(p.website)) p.website = "http://" + p.website;
+  if (t.opening_hours) {
+    const oh = parseOH(t.opening_hours);
+    if (oh) { if (oh.h24) { p.h24 = true; p.holiday = true; } else { p.days = oh.days; if (oh.holiday != null) p.holiday = oh.holiday; } }
+    p.ohRaw = t.opening_hours;
+  }
+  return p;
+}
+async function loadOSM() {
+  let els;
+  try {
+    const c = JSON.parse(localStorage.getItem("osm") || "null");
+    if (c && Date.now() - c.t < 864e5) els = c.els;
+  } catch (e) {}
+  if (!els) {
+    const q = '[out:json][timeout:60];nwr["amenity"="pharmacy"](43.13,27.75,43.30,28.05);out center tags;';
+    const r = await fetch("https://overpass-api.de/api/interpreter", { method:"POST", body:"data=" + encodeURIComponent(q) });
+    els = (await r.json()).elements;
+    try { localStorage.setItem("osm", JSON.stringify({ t:Date.now(), els })); } catch (e) {}
+  }
+  const known = pharmacies.slice();
+  for (const el of els) {
+    const p = fromOSM(el);
+    const dup = known.find(k => (digits(k.phone) && digits(k.phone) === digits(p.phone)) || (k.address.length > 6 && addrKey(k.address) === addrKey(p.address)));
+    if (dup) { dup.coord = dup.coord || p.coord; dup.website = dup.website || p.website; continue; }
+    pharmacies.push(p);
+  }
+  return els.length;
+}
 function sofiaNow() {
   const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone:"Europe/Sofia", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false })
     .formatToParts(new Date()).map(x => [x.type, x.value]));
@@ -85,13 +165,21 @@ function sofiaNow() {
 }
 function isOpen(p, now) {
   if (p.h24) return true;
-  if (!p.sched) return null;
-  return p.sched.some(([days,o,c]) => days.includes(now.day) && now.min >= toMin(o) && now.min < toMin(c));
+  if (!p.days) return null;
+  return (p.days[now.day] || []).some(([o,c]) => now.min >= o && now.min < c);
 }
+const hhmm = m => String(Math.floor(m/60) % 24).padStart(2,"0") + ":" + String(m%60).padStart(2,"0");
 function hoursText(p) {
   if (p.h24) return "Денонощно";
-  if (!p.sched) return "—";
-  return p.sched.map(([days,o,c]) => (days.length === 7 ? "Всеки ден" : days.length === 1 ? DAYS[days[0]] : DAYS[days[0]] + "–" + DAYS[days[days.length-1]]) + " " + o + "–" + c).join(", ");
+  if (!p.days) return "—";
+  const txt = d => (p.days[d] || []).map(([o,c]) => hhmm(o) + "–" + (c === 1440 ? "24:00" : hhmm(c))).join(", ") || "почивен";
+  const order = [1,2,3,4,5,6,0], groups = [];
+  for (const d of order) {
+    const last = groups[groups.length-1];
+    if (last && last.t === txt(d)) last.end = d; else groups.push({ start:d, end:d, t:txt(d) });
+  }
+  if (groups.length === 1) return "Всеки ден " + groups[0].t;
+  return groups.map(g => (g.start === g.end ? DAYS[g.start] : DAYS[g.start] + "–" + DAYS[g.end]) + " " + g.t).join(", ");
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -138,10 +226,12 @@ document.getElementById("locate").onclick = () => {
   statusEl.textContent = "Чакам разрешение за местоположение…";
   navigator.geolocation.getCurrentPosition(async pos => {
     user = [pos.coords.latitude, pos.coords.longitude];
-    for (const p of pharmacies) {
+    for (const p of pharmacies) if (p.coord) p.dist = km(user, p.coord);
+    render();
+    for (const p of pharmacies.filter(p => !p.coord && !p.osm)) {
       statusEl.textContent = "Определям разстоянията… (" + p.name + ")";
       const c = await geocode(p);
-      if (c) p.dist = km(user, c);
+      if (c) { p.coord = c; p.dist = km(user, c); }
       render();
     }
     statusEl.textContent = pharmacies.some(p => p.dist != null) ? "Подредено по разстояние до теб (по права линия)." : "Не успях да определя адресите на картата.";
@@ -178,6 +268,12 @@ function render() {
 ["q","fOpen","f24","fCompound","fHoliday"].forEach(id => $(id).addEventListener("input", render));
 render();
 setInterval(render, 60000);
+statusEl.textContent = "Зареждам всички аптеки от OpenStreetMap…";
+loadOSM().then(n => {
+  statusEl.textContent = "Заредени аптеки: " + pharmacies.length + " (OpenStreetMap: " + n + ").";
+  if (user) for (const p of pharmacies) if (p.coord) p.dist = km(user, p.coord);
+  render();
+}).catch(() => { statusEl.textContent = "Не успях да заредя пълния списък от OpenStreetMap – показвам само потвърдените аптеки."; });
 </script>
 </body>
 </html>
