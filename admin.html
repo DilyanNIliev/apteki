@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="bg" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Редакция на аптеките</title>
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+  .edit { display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); margin-top:8px; }
+  .edit label { display:block; font-size:.8rem; color:var(--muted); }
+  .edit input[type=text], .edit input[type=time], .edit textarea { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
+  .edit .wide { grid-column:1 / -1; }
+  .edit .chk { display:flex; flex-direction:row; align-items:center; gap:6px; color:var(--text); font-size:.9rem; }
+  .card.changed { border-color:var(--accent); }
+  .bar { position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 0; border-bottom:1px solid var(--line); }
+  .bulk { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  textarea.json { width:100%; height:160px; font:12px/1.4 monospace; background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><a href="./">← Към сайта</a><button id="theme" type="button" aria-label="Смяна на режима"></button></div>
+  <h1>Редакция на аптеките</h1>
+  <p class="sub">Попълваш полетата, промените се пазят в този браузър. Накрая натискаш „Свали overrides.json“ (или „Копирай“) и ми го пращаш – аз го качвам и сайтът се обновява.</p>
+</header>
+<main>
+  <div class="bar">
+    <div class="controls">
+      <input type="search" id="q" placeholder="Търси по име, адрес, телефон или №…">
+      <label><input type="checkbox" id="fSite"> Липсва сайт (има в Google)</label>
+      <label><input type="checkbox" id="fOpen"> Липсва час на отваряне</label>
+      <label><input type="checkbox" id="fChanged"> Само променените</label>
+    </div>
+    <div class="bulk">
+      <span>Общ час на отваряне за всички без такъв:</span>
+      <input type="time" id="bulkOpen">
+      <button type="button" id="bulkApply">Приложи</button>
+      <span style="flex:1"></span>
+      <button type="button" class="primary" id="dl">⬇ Свали overrides.json</button>
+      <button type="button" id="copy">Копирай</button>
+      <button type="button" id="imp">Импортирай</button>
+      <button type="button" id="reset">Изчисти чернова</button>
+    </div>
+    <p id="status" role="status"></p>
+  </div>
+  <div id="importBox" hidden>
+    <p class="note">Постави JSON от overrides.json и натисни „Зареди“.</p>
+    <textarea class="json" id="importText"></textarea>
+    <button type="button" id="importGo">Зареди</button>
+  </div>
+  <div class="grid" id="list" style="grid-template-columns:repeat(auto-fill,minmax(340px,1fr))"></div>
+</main>
+<script src="common.js"></script>
+<script>
+const FIELDS = ["name","address","phone","open","close","website","gmaps","lat","lon","note"];
+const BOOLS = ["compound","holiday"];
+const LABEL = { name:"Име", address:"Адрес", phone:"Телефон", open:"Отваря в", close:"Затваря в", website:"Уебсайт (https://…)", gmaps:"Линк за упътвания (Google Maps)", lat:"Ширина (lat)", lon:"Дължина (lon)", note:"Бележка", compound:"Приготвя лекарства", holiday:"Работи на празници" };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let base = [], saved = {}, draft = {};   // saved = текущият overrides.json, draft = промени от този браузър
+
+try { draft = JSON.parse(localStorage.getItem("draft") || "{}"); } catch (e) {}
+const persist = () => { try { localStorage.setItem("draft", JSON.stringify(draft)); } catch (e) {} };
+const merged = id => ({ ...(saved[id] || {}), ...(draft[id] || {}) });
+const val = (p, k) => { const m = merged(p.id); return k in m ? m[k] : (p[k] ?? ""); };
+
+function cleaned() {            // overrides.json: без празни стойности
+  const out = {};
+  for (const p of base) {
+    const m = merged(p.id), o = {};
+    for (const k of [...FIELDS, ...BOOLS]) {
+      const v = m[k];
+      if (v === undefined || v === "" || v === false || v === null) continue;
+      o[k] = k === "lat" || k === "lon" ? Number(String(v).replace(",", ".")) : v;
+    }
+    if (Object.keys(o).length) out[p.id] = o;
+  }
+  return JSON.stringify(out, null, 2) + "\n";
+}
+const changedCount = () => Object.keys(draft).filter(id => Object.keys(draft[id]).length).length;
+
+function render() {
+  const q = $("q").value.trim().toLowerCase();
+  const items = base.filter(p =>
+    (p.id + " " + p.name + " " + p.address + " " + p.phone).toLowerCase().includes(q) &&
+    (!$("fSite").checked || (p.hasSite && !val(p, "website"))) &&
+    (!$("fOpen").checked || !val(p, "open")) &&
+    (!$("fChanged").checked || (draft[p.id] && Object.keys(draft[p.id]).length)));
+  $("status").textContent = "Показани " + items.length + " от " + base.length + " · променени в тази чернова: " + changedCount();
+  $("list").innerHTML = items.map(p => `
+    <article class="card ${draft[p.id] && Object.keys(draft[p.id]).length ? "changed" : ""}" data-id="${p.id}">
+      <h2>№${p.id} · ${esc(val(p, "name"))} ${p.hasSite && !val(p, "website") ? '<span class="badge alt">има сайт</span>' : ""}</h2>
+      <div class="row">${esc(val(p, "address"))}</div>
+      <div class="edit">
+        ${FIELDS.map(k => `<label class="${["note","gmaps","website","address","name"].includes(k) ? "wide" : ""}">${LABEL[k]}
+          <input type="${k === "open" || k === "close" ? "time" : "text"}" data-k="${k}" value="${esc(val(p, k))}"></label>`).join("")}
+        ${BOOLS.map(k => `<label class="chk"><input type="checkbox" data-k="${k}" ${val(p, k) || (k === "holiday" && p.h24) ? "checked" : ""}> ${LABEL[k]}</label>`).join("")}
+      </div>
+    </article>`).join("");
+}
+
+$("list").addEventListener("change", e => {
+  const el = e.target, card = el.closest("[data-id]");
+  if (!card || !el.dataset.k) return;
+  const id = card.dataset.id, k = el.dataset.k;
+  (draft[id] ||= {})[k] = el.type === "checkbox" ? el.checked : el.value.trim();
+  persist();
+  card.classList.add("changed");
+  $("status").textContent = "Променени в тази чернова: " + changedCount();
+});
+["q","fSite","fOpen","fChanged"].forEach(id => $(id).addEventListener("input", render));
+
+$("bulkApply").onclick = () => {
+  const t = $("bulkOpen").value;
+  if (!t) { alert("Първо избери час."); return; }
+  const targets = base.filter(p => !p.h24 && !val(p, "open"));
+  if (!confirm("Ще сложа отваряне в " + t + " на " + targets.length + " аптеки без такова. Продължаваш ли?")) return;
+  for (const p of targets) (draft[p.id] ||= {}).open = t;
+  persist(); render();
+};
+$("dl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([cleaned()], { type:"application/json" }));
+  a.download = "overrides.json"; a.click();
+};
+$("copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(cleaned()); $("status").textContent = "Копирано в клипборда."; }
+  catch (e) { $("importBox").hidden = false; $("importText").value = cleaned(); $("status").textContent = "Копирай ръчно от полето по-долу."; }
+};
+$("imp").onclick = () => { $("importBox").hidden = !$("importBox").hidden; };
+$("importGo").onclick = () => {
+  try {
+    const j = JSON.parse($("importText").value);
+    for (const [id, o] of Object.entries(j)) if (/^\d{3}$/.test(id)) draft[id] = { ...(draft[id] || {}), ...o };
+    persist(); $("importBox").hidden = true; render();
+  } catch (e) { alert("Невалиден JSON."); }
+};
+$("reset").onclick = () => { if (confirm("Да изтрия всички непратени промени от този браузър?")) { draft = {}; persist(); render(); } };
+
+Promise.all([
+  fetch("data.json").then(r => r.json()),
+  fetch("data/overrides.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
+]).then(([d, o]) => { base = d; saved = o; delete saved["_пояснение"]; render(); })
+  .catch(() => { $("status").textContent = "Данните не могат да се заредят."; });
+</script>
+</body>
+</html>

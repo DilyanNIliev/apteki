@@ -12,13 +12,14 @@ try { overrides = JSON.parse(readFileSync("data/overrides.json", "utf8")); } cat
 
 const rows = readFileSync("data/pharmacies.txt", "utf8").split("\n").filter(l => l.trim() && !l.startsWith("#"));
 const list = rows.map((line, i) => {
-  const [name, address, phone, close, flags = ""] = line.split("|").map(s => s.trim());
+  const [name0, address0, phone0, close, flags = ""] = line.split("|").map(s => s.trim());
   const id = String(i + 1).padStart(3, "0");
   const f = flags.split(/\s+/);
   const o = overrides[id] || {};
+  const name = o.name || name0, address = o.address || address0;
   return {
-    id, slug: id + "-" + slugify(name).slice(0, 40) + "-" + slugify(address).slice(0, 30),
-    name, address, phone: phone || "",
+    id, slug: id + "-" + slugify(name0).slice(0, 40) + "-" + slugify(address0).slice(0, 30),
+    name, address, phone: o.phone || phone0 || "",
     open: o.open || "", close: o.close || close || "",
     h24: f.includes("24"), closedTemp: f.includes("x"),
     hasSite: f.includes("w") || !!o.website, website: o.website || "",
