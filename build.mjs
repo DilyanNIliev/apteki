@@ -59,9 +59,9 @@ ${theme}
 <div class="layout">
 <aside class="ad">Място за реклама</aside>
 <div class="content">
-<nav class="nav"><a class="on" href="../">Аптеки</a><a href="../pochivni-dni.html">Почивни дни</a></nav>
+<nav class="nav"><a class="on" href="../">Аптеки</a><a href="../pochivni-dni.html">Почивни дни</a><button id="theme" type="button" aria-label="Смяна на режима"></button></nav>
 <header>
-  <div class="top"><a href="../">← Всички аптеки</a><button id="theme" type="button" aria-label="Смяна на режима"></button></div>
+  <div class="top"><a href="../">← Всички аптеки</a></div>
   <h1>${esc(p.name)}</h1>
   <div id="badges">${p.h24 ? '<span class="badge">24ч</span>' : ""}${p.closedTemp ? '<span class="badge closed">Временно затворена</span>' : ""}${p.compound ? '<span class="badge alt">Приготвя лекарства</span>' : ""}${p.holiday ? '<span class="badge alt">Работи на празници</span>' : ""}<span id="state"></span></div>
 </header>
