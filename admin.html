@@ -10,7 +10,8 @@
 <style>
   .edit { display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); margin-top:8px; }
   .edit label { display:block; font-size:.8rem; color:var(--muted); }
-  .edit input[type=text], .edit input[type=time], .edit textarea { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
+  .edit input[type=text], .edit select, .edit textarea { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; }
+  .edit select { appearance:auto; }
   .edit .wide { grid-column:1 / -1; }
   .edit .chk { display:flex; flex-direction:row; align-items:center; gap:6px; color:var(--text); font-size:.9rem; }
   .card.changed { border-color:var(--accent); }
@@ -45,7 +46,7 @@
     </div>
     <div class="bulk">
       <span>Общ час на отваряне за всички без такъв:</span>
-      <input type="time" id="bulkOpen" step="900">
+      <span id="bulkOpenBox"></span>
       <button type="button" id="bulkApply">Приложи</button>
       <span style="flex:1"></span>
       <button type="button" class="primary" id="save">💾 Запази в сайта</button>
@@ -69,6 +70,12 @@ const FIELDS = ["name","address","phone","open","close","website","gmaps","lat",
 const BOOLS = ["compound","holiday"];
 const LABEL = { name:"Име", address:"Адрес", phone:"Телефон", open:"Отваря в", close:"Затваря в", website:"Уебсайт (https://…)", gmaps:"Линк за упътвания (Google Maps)", lat:"Ширина (lat)", lon:"Дължина (lon)", note:"Бележка", compound:"Приготвя лекарства", holiday:"Работи на празници" };
 const $ = id => document.getElementById(id);
+// час само през 15 минути (00, 15, 30, 45)
+const TIMES = Array.from({ length: 96 }, (_, i) => String(Math.floor(i / 4)).padStart(2, "0") + ":" + String((i % 4) * 15).padStart(2, "0"));
+function timeSelect(attrs, value) {
+  const opts = (value && !TIMES.includes(value) ? [value, ...TIMES] : TIMES);   // нестандартен час от стари данни се запазва като опция
+  return `<select ${attrs}><option value="">—</option>${opts.map(t => `<option ${t === value ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+}
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let base = [], saved = {}, draft = {};   // saved = текущият overrides.json, draft = промени от този браузър
 
@@ -106,7 +113,7 @@ function render() {
       <div class="row">${esc(val(p, "address"))}</div>
       <div class="edit">
         ${FIELDS.map(k => `<label class="${["note","gmaps","website","address","name"].includes(k) ? "wide" : ""}">${LABEL[k]}
-          <input type="${k === "open" || k === "close" ? "time" : "text"}" ${k === "open" || k === "close" ? 'step="900"' : ""} data-k="${k}" value="${esc(val(p, k))}"></label>`).join("")}
+          ${k === "open" || k === "close" ? timeSelect(`data-k="${k}"`, val(p, k)) : `<input type="text" data-k="${k}" value="${esc(val(p, k))}">`}</label>`).join("")}
         ${BOOLS.map(k => `<label class="chk"><input type="checkbox" data-k="${k}" ${val(p, k) || (k === "holiday" && p.h24) ? "checked" : ""}> ${LABEL[k]}</label>`).join("")}
       </div>
     </article>`).join("");
@@ -186,6 +193,7 @@ $("importGo").onclick = () => {
 };
 $("reset").onclick = () => { if (confirm("Да изтрия всички непратени промени от този браузър?")) { draft = {}; persist(); render(); } };
 
+$("bulkOpenBox").innerHTML = timeSelect('id="bulkOpen"', "");
 Promise.all([
   fetch("data.json").then(r => r.json()),
   fetch("data/overrides.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
