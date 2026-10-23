@@ -75,7 +75,7 @@ try { const y = +new URLSearchParams(location.search).get("year"); if (YEARS.inc
 function render() {
   $("yearTitle").textContent = year;
   document.title = "Почивни дни " + year + " – България";
-  $("years").innerHTML = YEARS.map(y => `<button type="button" class="${y === year ? "on" : ""}" data-y="${y}">${y}${y === thisYear ? " (тази)" : y < thisYear ? " (мина)" : " (следваща)"}</button>`).join("");
+  $("years").innerHTML = YEARS.map(y => `<button type="button" class="${y === year ? "on" : ""}" data-y="${y}">${y}</button>`).join("");
   const hs = holidays(year), map = Object.fromEntries(hs.map(h => [h.iso, h]));
   $("list").innerHTML = hs.map(h => `<div class="hol ${h.iso < todayIso ? "past" : ""}">
       <div class="d">${h.date.getDate()} ${MON[h.date.getMonth()]}, ${DOW[h.date.getDay()]}</div>
