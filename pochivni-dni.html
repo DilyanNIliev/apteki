@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="bg" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почивни дни в България</title>
+<meta name="description" content="Официални празници и почивни дни в България – за миналата, текущата и следващата година.">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<aside class="ad">Място за реклама</aside>
+<div class="content">
+<nav class="nav"><a href="./">Аптеки</a><a class="on" href="pochivni-dni.html">Почивни дни</a></nav>
+<header>
+  <div class="top"><h1>Почивни дни <span id="yearTitle"></span></h1><button id="theme" type="button" aria-label="Смяна на режима"></button></div>
+  <p class="sub">Официални празници и неработни дни в България. На празничните дни повечето аптеки работят по празнично работно време – виж страницата на аптеката или се обади.</p>
+  <div class="years" id="years" role="tablist" aria-label="Година"></div>
+</header>
+<main>
+  <section class="card"><div class="hol-list" id="list"></div></section>
+  <div class="legend"><span><i style="background:var(--warn)"></i>Официален празник</span><span><i style="background:var(--accent)"></i>Компенсиран почивен ден</span><span><i style="outline:2px solid var(--text)"></i>Днес</span></div>
+  <div class="months" id="months"></div>
+  <p class="note" id="notes"></p>
+</main>
+</div>
+<aside class="ad">Място за реклама</aside>
+</div>
+<script src="common.js"></script>
+<script>
+// Празниците са изчислени по чл. 154 от Кодекса на труда. Допълнителни почивни дни по решение на Министерския съвет – в EXTRA.
+const EXTRA = {
+  2026: [{ date:"2026-01-02", name:"Почивен ден по решение на Министерския съвет", off:true }]
+};
+const DOW = ["Неделя","Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота"];
+const MON = ["Януари","Февруари","Март","Април","Май","Юни","Юли","Август","Септември","Октомври","Ноември","Декември"];
+const iso = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const mk = (y, m, d) => new Date(y, m-1, d);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
+function orthodoxEaster(y) {           // Юлиански Великден + 13 дни (валидно 1900–2099)
+  const a = y % 4, b = y % 7, c = y % 19, d = (19*c + 15) % 30, e = (2*a + 4*b - d + 34) % 7;
+  const month = Math.floor((d + e + 114) / 31), day = ((d + e + 114) % 31) + 1;
+  return addDays(mk(y, month, day), 13);
+}
+function holidays(y) {
+  const easter = orthodoxEaster(y);
+  const fixed = [
+    [1,1,"Нова година"], [3,3,"Ден на Освобождението на България"], [5,1,"Ден на труда и на международната работническа солидарност"],
+    [5,6,"Гергьовден, Ден на храбростта и на Българската армия"], [5,24,"Ден на българската просвета и култура и на славянската писменост"],
+    [9,6,"Ден на Съединението"], [9,22,"Ден на Независимостта"], [12,24,"Бъдни вечер"], [12,25,"Рождество Христово"], [12,26,"Рождество Христово (втори ден)"]
+  ].map(([m,d,name]) => ({ date:mk(y,m,d), name }));
+  const easterDays = [[-2,"Велики петък"],[-1,"Велика събота"],[0,"Великден"],[1,"Великден (втори ден)"]]
+    .map(([n,name]) => ({ date:addDays(easter,n), name, easter:true }));
+  const all = [...fixed, ...easterDays].sort((a,b) => a.date - b.date);
+  // Празник (без Великден) в събота/неделя -> следващият работен ден е почивен (чл. 154, ал. 2 КТ)
+  const taken = new Set(all.map(h => iso(h.date))), out = all.map(h => ({ ...h, iso:iso(h.date) }));
+  for (const h of all.filter(h => !h.easter && [0,6].includes(h.date.getDay()))) {
+    let d = addDays(h.date, 1);
+    while ([0,6].includes(d.getDay()) || taken.has(iso(d))) d = addDays(d, 1);
+    taken.add(iso(d));
+    out.push({ date:d, iso:iso(d), name:"Почивен ден – компенсация за празник в " + DOW[h.date.getDay()].toLowerCase() + " (" + h.date.getDate() + " " + MON[h.date.getMonth()].toLowerCase() + ")", off:true });
+  }
+  for (const x of EXTRA[y] || []) { const d = new Date(x.date + "T00:00:00"); out.push({ date:d, iso:x.date, name:x.name, off:true }); }
+  return out.sort((a,b) => a.date - b.date);
+}
+
+const todayIso = (() => { const p = new Intl.DateTimeFormat("en-CA", { timeZone:"Europe/Sofia" }).format(new Date()); return p; })();
+const thisYear = +todayIso.slice(0, 4);
+const YEARS = [thisYear - 1, thisYear, thisYear + 1];
+let year = thisYear;
+try { const y = +new URLSearchParams(location.search).get("year"); if (YEARS.includes(y)) year = y; } catch (e) {}
+
+function render() {
+  $("yearTitle").textContent = year;
+  document.title = "Почивни дни " + year + " – България";
+  $("years").innerHTML = YEARS.map(y => `<button type="button" class="${y === year ? "on" : ""}" data-y="${y}">${y}${y === thisYear ? " (тази)" : y < thisYear ? " (мина)" : " (следваща)"}</button>`).join("");
+  const hs = holidays(year), map = Object.fromEntries(hs.map(h => [h.iso, h]));
+  $("list").innerHTML = hs.map(h => `<div class="hol ${h.iso < todayIso ? "past" : ""}">
+      <div class="d">${h.date.getDate()} ${MON[h.date.getMonth()]}, ${DOW[h.date.getDay()]}</div>
+      <div>${esc(h.name)}${h.off ? ' <span class="badge">почивен ден</span>' : ' <span class="badge closed">празник</span>'}</div></div>`).join("");
+  $("months").innerHTML = MON.map((name, m) => {
+    const first = new Date(year, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(year, m + 1, 0).getDate();
+    let cells = ["Пн","Вт","Ср","Чт","Пт","Сб","Нд"].map(x => `<span class="dow">${x}</span>`).join("") + "<span></span>".repeat(pad);
+    for (let d = 1; d <= days; d++) {
+      const dt = new Date(year, m, d), key = iso(dt), h = map[key];
+      const cls = [h ? (h.off ? "off" : "ph") : [0,6].includes(dt.getDay()) ? "we" : "", key === todayIso ? "today" : ""].join(" ");
+      cells += `<span class="${cls}" ${h ? `title="${esc(h.name)}"` : ""}>${d}</span>`;
+    }
+    return `<div class="card month"><h3>${name}</h3><div class="cal">${cells}</div></div>`;
+  }).join("");
+  const n = hs.length;
+  $("notes").textContent = "Общо " + n + " неработни дни в списъка за " + year + " г. Ако празник (без Великденските) се падне в събота или неделя, почива се на следващия работен ден. Официалният списък се определя от Кодекса на труда и решенията на Министерския съвет – при съмнение провери в Държавен вестник.";
+}
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$("years").addEventListener("click", e => {
+  const y = +e.target.dataset.y;
+  if (!y) return;
+  year = y;
+  try { history.replaceState(null, "", "?year=" + y); } catch (err) {}
+  render();
+});
+render();
+</script>
+</body>
+</html>
