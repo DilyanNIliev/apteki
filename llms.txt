@@ -1,0 +1,163 @@
+# Аптеки във Варна и почивни дни
+
+> Каталог на 142 аптеки във Варна (адрес, телефон, работно време, карта) и календар с официалните почивни дни, учебните ваканции и препоръки за отпуска в България.
+
+## Страници
+- [Аптеки във Варна](https://dilyanniliev.github.io/apteki/): търсене и филтри – работят сега, денонощни, най-близка до мен
+- [Почивни дни в България](https://dilyanniliev.github.io/apteki/pochivni-dni.html): празници за 2025, 2026, 2027, учебни ваканции и най-изгодни комбинации за отпуска
+- [Данни за аптеките (JSON)](https://dilyanniliev.github.io/apteki/data.json): всички аптеки като структурирани данни
+
+## Денонощни аптеки във Варна
+- [Денонощна аптека Живита](https://dilyanniliev.github.io/apteki/apteka/002-denonoshtna-apteka-zhivita-bul-vladislav-varnenchik-65.html): бул. Владислав Варненчик 65, 052 607 033
+- [Валя Дечева](https://dilyanniliev.github.io/apteki/apteka/004-valya-decheva-bul-tsar-osvoboditel-77a.html): бул. Цар Освободител 77А, 052 612 008
+- [Санита](https://dilyanniliev.github.io/apteki/apteka/023-sanita-ul-general-kolev-72.html): ул. Генерал Колев 72, 052 602 560
+- [Ани Фарма – денонощна аптека](https://dilyanniliev.github.io/apteki/apteka/066-ani-farma-denonoshtna-apteka-ul-mir-8.html): ул. Мир 8, 089 966 6692
+- [Денонощна аптека](https://dilyanniliev.github.io/apteki/apteka/140-denonoshtna-apteka-ul-tsar-ivan-asen-ii-42.html): ул. Цар Иван Асен II 42, 087 688 0400
+
+## Всички аптеки
+- [Аптека Матрикариа (бул. Сливница)](https://dilyanniliev.github.io/apteki/apteka/001-apteka-matrikaria-bul-slivnitsa-ul-petko-yu-todorov-57.html): ул. Петко Ю. Тодоров 57, 052 806 057 – всеки ден 17:48–20:00
+- [Денонощна аптека Живита](https://dilyanniliev.github.io/apteki/apteka/002-denonoshtna-apteka-zhivita-bul-vladislav-varnenchik-65.html): бул. Владислав Варненчик 65, 052 607 033 – Денонощно
+- [Панацея](https://dilyanniliev.github.io/apteki/apteka/003-panatseya-ul-patriarh-evtimiy-34.html): ул. Патриарх Евтимий 34, 052 640 209 – затваря в 22:00 ч.
+- [Валя Дечева](https://dilyanniliev.github.io/apteki/apteka/004-valya-decheva-bul-tsar-osvoboditel-77a.html): бул. Цар Освободител 77А, 052 612 008 – Денонощно
+- [Субра](https://dilyanniliev.github.io/apteki/apteka/005-subra-ul-akademik-andrey-saharov-2.html): ул. Академик Андрей Сахаров 2, 088 528 0933 – затваря в 22:00 ч.
+- [Марешки](https://dilyanniliev.github.io/apteki/apteka/006-mareshki-ul-topola-16-a.html): ул. Топола 16-A, 087 814 2878 – затваря в 19:00 ч.
+- [Аптека Фрамар 37](https://dilyanniliev.github.io/apteki/apteka/007-apteka-framar-37-ul-yuriy-venelin-28.html): ул. Юрий Венелин 28, 089 557 1042 – затваря в 20:00 ч.
+- [Аптека Матрикариа (ул. А. Сахаров 3)](https://dilyanniliev.github.io/apteki/apteka/008-apteka-matrikaria-ul-a-saharov-3-ul-akademik-andrey-saharov-1.html): ул. Академик Андрей Сахаров 1, 052 801 213 – затваря в 20:00 ч.
+- [К-Крес](https://dilyanniliev.github.io/apteki/apteka/009-k-kres-bul-vladislav-varnenchik-88.html): бул. Владислав Варненчик 88, 052 620 340 – затваря в 20:30 ч.
+- [Аптека Валенс](https://dilyanniliev.github.io/apteki/apteka/010-apteka-valens-ul-beli-lilii-25.html): ул. Бели лилии 25, 089 861 2348 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/011-sopharmacy-bul-hristo-smirnenski-2v.html): бул. Христо Смирненски 2В, 088 274 0013 – затваря в 21:00 ч.
+- [Поли-Валенс](https://dilyanniliev.github.io/apteki/apteka/012-poli-valens-ul-otets-paisiy-2.html): ул. Отец Паисий 2, 052 601 026 – затваря в 20:00 ч.
+- [Аптека Глухарова](https://dilyanniliev.github.io/apteki/apteka/013-apteka-gluharova-ul-yuriy-venelin-10.html): ул. Юрий Венелин 10, 089 783 5783 – затваря в 20:00 ч.
+- [Аптека Поли-Валенс](https://dilyanniliev.github.io/apteki/apteka/014-apteka-poli-valens-zh-k-sveti-ivan-rilski-28v.html): ж.к. Свети Иван Рилски 28В – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/015-sopharmacy-ul-bratya-miladinovi-73.html): ул. Братя Миладинови 73, 088 274 0013 – затваря в 21:00 ч.
+- [Санита](https://dilyanniliev.github.io/apteki/apteka/016-sanita-bul-vladislav-varnenchik-12.html): бул. Владислав Варненчик 12, 052 825 205 – затваря в 21:00 ч.
+- [Аптека Кактус](https://dilyanniliev.github.io/apteki/apteka/017-apteka-kaktus-ul-bratya-bakston-12.html): ул. Братя Бъкстон 12, 052 308 952 – затваря в 20:00 ч.
+- [Аптека Матрикариа (Колхозен пазар)](https://dilyanniliev.github.io/apteki/apteka/018-apteka-matrikaria-kolhozen-pazar-ul-han-malamir-2a.html): ул. Хан Маламир 2А, 052 808 103 – затваря в 20:00 ч.
+- [Аптека Фрамар 36](https://dilyanniliev.github.io/apteki/apteka/019-apteka-framar-36-ul-aleksandar-rachinski-29.html): ул. Александър Рачински 29, 089 449 4402 – затваря в 20:00 ч.
+- [Аптеки Prime – Левски, Евлоги Георгиев](https://dilyanniliev.github.io/apteki/apteka/020-apteki-prime-levski-evlogi-georgiev-ul-evlogi-georgiev-18.html): ул. Евлоги Георгиев 18, 088 217 5784 – затваря в 20:00 ч.
+- [Аптека Вита-Л](https://dilyanniliev.github.io/apteki/apteka/021-apteka-vita-l-ul-bratya-miladinovi-152.html): ул. Братя Миладинови 152 – затваря в 21:30 ч.
+- [Аптека Равиа – Цветен](https://dilyanniliev.github.io/apteki/apteka/022-apteka-ravia-tsveten-ul-roza-29.html): ул. Роза 29, 087 844 4306 – затваря в 20:00 ч.
+- [Санита](https://dilyanniliev.github.io/apteki/apteka/023-sanita-ul-general-kolev-72.html): ул. Генерал Колев 72, 052 602 560 – Денонощно
+- [SOpharmacy (Софармаси)](https://dilyanniliev.github.io/apteki/apteka/024-sopharmacy-sofarmasi-bul-vladislav-varnenchik-8-10.html): бул. Владислав Варненчик 8-10, 088 274 0013 – затваря в 21:00 ч.
+- [Аптека Фрамар 42](https://dilyanniliev.github.io/apteki/apteka/025-apteka-framar-42-ul-seliolu-11.html): ул. Селиолу 11, 089 337 6708 – затваря в 21:00 ч.
+- [Юноя](https://dilyanniliev.github.io/apteki/apteka/026-yunoya-ul-nezhnost-22.html): ул. Нежност 22, 089 546 1976 – затваря в 20:00 ч.
+- [Аптека Европа](https://dilyanniliev.github.io/apteki/apteka/027-apteka-evropa-ul-bregalnitsa-1.html): ул. Брегалница 1 – затваря в 19:30 ч.
+- [Аптека Новела](https://dilyanniliev.github.io/apteki/apteka/028-apteka-novela-ul-tihomir-27a.html): ул. Тихомир 27А, 089 362 3605 – затваря в 20:00 ч.
+- [Аптека Матрикариа Младост](https://dilyanniliev.github.io/apteki/apteka/029-apteka-matrikaria-mladost-zh-k-mladost-2-do-blok-146.html): ж.к. Младост 2, до блок 146, 052 806 053 – затваря в 20:00 ч.
+- [Аптека Марешки Илинден](https://dilyanniliev.github.io/apteki/apteka/030-apteka-mareshki-ilinden-ul-ilinden-6.html): ул. Илинден 6, 087 864 8878 – затваря в 19:30 ч.
+- [Аптека Марешки (МЦ Младост)](https://dilyanniliev.github.io/apteki/apteka/031-apteka-mareshki-mts-mladost-bul-republika-15.html): бул. Република 15, 087 887 8497 – затваря в 20:00 ч.
+- [Аптека Медунифарм](https://dilyanniliev.github.io/apteki/apteka/032-apteka-medunifarm-bul-tsar-osvoboditel-84.html): бул. Цар Освободител 84, 052 677 155 – затваря в 19:00 ч.
+- [Матрикариа Окръжна болница](https://dilyanniliev.github.io/apteki/apteka/033-matrikaria-okrazhna-bolnitsa-bul-tsar-osvoboditel-67.html): бул. Цар Освободител 67, 052 808 101 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/034-sopharmacy-ul-dubrovnik-39.html): ул. Дубровник 39, 088 274 0013 – затваря в 21:00 ч.
+- [Аптека Д-р Басанович](https://dilyanniliev.github.io/apteki/apteka/035-apteka-d-r-basanovich-ul-doktor-ivan-basanovich-111.html): ул. Доктор Иван Басанович 111, 052 303 260 – затваря в 23:00 ч.
+- [Аптека Сана Трошево](https://dilyanniliev.github.io/apteki/apteka/036-apteka-sana-troshevo-ul-radost-9-vh-zh.html): ул. Радост 9, вх. Ж, 052 697 060 – затваря в 20:00 ч.
+- [Вилдема – Л. Недева](https://dilyanniliev.github.io/apteki/apteka/037-vildema-l-nedeva-ul-bratya-miladinovi-152.html): ул. Братя Миладинови 152, 052 609 180 – затваря в 21:30 ч.
+- [К-Крес 3](https://dilyanniliev.github.io/apteki/apteka/038-k-kres-3-ul-sveti-ivan-rilski-2.html): ул. Свети Иван Рилски 2 – затваря в 20:00 ч.
+- [Аптека Бриз](https://dilyanniliev.github.io/apteki/apteka/039-apteka-briz-ul-han-sevar-5.html): ул. Хан Севар 5, 087 772 6003 – затваря в 20:00 ч.
+- [Аптека Марешки Владая](https://dilyanniliev.github.io/apteki/apteka/040-apteka-mareshki-vladaya-ul-vladaya-11.html): ул. Владая 11, 087 887 8509 – затваря в 20:00 ч.
+- [Аптека Панацея – Варна](https://dilyanniliev.github.io/apteki/apteka/041-apteka-panatseya-varna-ul-ruse-5-sreshtu-operata.html): ул. Русе 5 (срещу Операта), 088 810 0564 – затваря в 20:00 ч.
+- [Дива](https://dilyanniliev.github.io/apteki/apteka/042-diva-bul-tsar-osvoboditel-bl-79-vh-.html): бул. Цар Освободител, бл. 79, вх. А, 052 615 960 – затваря в 22:00 ч.
+- [Аптека Елица](https://dilyanniliev.github.io/apteki/apteka/043-apteka-elitsa-ul-krakra-30.html): ул. Кракра 30, 087 940 4994 – затваря в 21:00 ч.
+- [Аптека Манолова](https://dilyanniliev.github.io/apteki/apteka/044-apteka-manolova-ul-roza.html): ул. Роза – затваря в 20:00 ч.
+- [Аптека Рен](https://dilyanniliev.github.io/apteki/apteka/045-apteka-ren-ul-tri-ushi-11.html): ул. Три уши 11, 088 437 9245 – затваря в 19:30 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/046-sopharmacy-bul-tsar-osvoboditel-100.html): бул. Цар Освободител 100, 088 274 0013 – затваря в 18:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/047-sopharmacy-bul-8-mi-primorski-polk-70.html): бул. 8-ми Приморски полк 70, 088 274 0013 – затваря в 20:00 ч.
+- [Аптека Сана Чаталджа](https://dilyanniliev.github.io/apteki/apteka/048-apteka-sana-chataldzha-bul-chataldzha-22.html): бул. Чаталджа 22, 052 580 480 – затваря в 20:00 ч.
+- [Аптека Свети Лука](https://dilyanniliev.github.io/apteki/apteka/049-apteka-sveti-luka-ul-ilinden-2.html): ул. Илинден 2 – затваря в 18:00 ч.
+- [Аптека Манолова](https://dilyanniliev.github.io/apteki/apteka/050-apteka-manolova-ul-tsar-asen-i-vi-54.html): ул. Цар Асен I-ви 54, 089 343 4793 – затваря в 20:30 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/051-sopharmacy-bul-republika.html): бул. Република, 088 274 0013 – затваря в 21:00 ч.
+- [Аптека Ани Фарма](https://dilyanniliev.github.io/apteki/apteka/052-apteka-ani-farma-ul-angel-kanchev.html): ул. Ангел Кънчев – затваря в 19:00 ч.
+- [Парецелз](https://dilyanniliev.github.io/apteki/apteka/053-paretselz-ul-pop-hariton-10.html): ул. Поп Харитон 10, 052 614 190 – затваря в 17:30 ч.
+- [Аптека Тилия](https://dilyanniliev.github.io/apteki/apteka/054-apteka-tiliya-ul-bratya-bakston-23.html): ул. Братя Бъкстон 23, 052 634 786 – затваря в 20:00 ч.
+- [Аптека Аврора 2](https://dilyanniliev.github.io/apteki/apteka/055-apteka-avrora-2-so-kochmar-264.html): СО Кочмар, № 264, 088 466 6012 – затваря в 20:00 ч.
+- [Аптека Нова1](https://dilyanniliev.github.io/apteki/apteka/056-apteka-nova1-ul-blyan-2.html): ул. Блян 2, 088 538 0300 – затваря в 20:00 ч.
+- [Аптека Марешки Селиолу](https://dilyanniliev.github.io/apteki/apteka/057-apteka-mareshki-seliolu-ul-seliolu-2.html): ул. Селиолу 2 – затваря в 19:30 ч.
+- [Аптека Гален 3](https://dilyanniliev.github.io/apteki/apteka/058-apteka-galen-3-ul-yosif-stoyanov-7.html): ул. Йосиф Стоянов 7, 087 982 3192 – затваря в 19:00 ч.
+- [Аптека Йорданова-Подвис](https://dilyanniliev.github.io/apteki/apteka/059-apteka-yordanova-podvis-ul-podvis-28.html): ул. Подвис 28 – затваря в 20:00 ч.
+- [Аптека Фрамар 48 (Дрогерия)](https://dilyanniliev.github.io/apteki/apteka/060-apteka-framar-48-drogeriya-bul-8-mi-primorski-polk-69.html): бул. 8-ми Приморски полк 69, 089 338 3040 – затваря в 21:00 ч.
+- [Аптека Попова](https://dilyanniliev.github.io/apteki/apteka/061-apteka-popova-ul-27-mi-yuli-16.html): ул. 27-ми юли 16, 052 616 050 – затваря в 20:00 ч.
+- [Аптека Бриз](https://dilyanniliev.github.io/apteki/apteka/062-apteka-briz-ul-hristo-popovich-3.html): ул. Христо Попович 3, 052 622 190 – затваря в 20:30 ч.
+- [Марешки – Владислав](https://dilyanniliev.github.io/apteki/apteka/063-mareshki-vladislav-bul-vladislav-varnenchik-86.html): бул. Владислав Варненчик 86, 087 887 8499 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/064-sopharmacy-bul-slivnitsa-185.html): бул. Сливница 185, 088 274 0013 – затваря в 21:00 ч.
+- [Агро Аптека](https://dilyanniliev.github.io/apteki/apteka/065-agro-apteka-ul-doktor-piskyuliev-82.html): ул. Доктор Пискюлиев 82, 088 855 2724 – затваря в 18:30 ч.
+- [Ани Фарма – денонощна аптека](https://dilyanniliev.github.io/apteki/apteka/066-ani-farma-denonoshtna-apteka-ul-mir-8.html): ул. Мир 8, 089 966 6692 – Денонощно
+- [Аптека Hedera Pharma](https://dilyanniliev.github.io/apteki/apteka/067-apteka-hedera-pharma-ul-ivan-aksakov-7.html): ул. Иван Аксаков 7, 087 643 3690 – затваря в 19:30 ч.
+- [Аптека Кактус 11](https://dilyanniliev.github.io/apteki/apteka/068-apteka-kaktus-11-ul-radost-8a.html): ул. Радост 8а, 087 854 3542 – затваря в 20:00 ч.
+- [Матрикариа Чаталджа](https://dilyanniliev.github.io/apteki/apteka/069-matrikaria-chataldzha-bul-8-mi-primorski-polk-112.html): бул. 8-ми Приморски полк 112, 052 806 054 – затваря в 20:00 ч.
+- [Аптека Манолова 6](https://dilyanniliev.github.io/apteki/apteka/070-apteka-manolova-6-ul-tsarevets-38a.html): ул. Царевец 38А, 052 960 189 – затваря в 20:30 ч.
+- [Аптека Матрикариа (кметство Приморски)](https://dilyanniliev.github.io/apteki/apteka/071-apteka-matrikaria-kmetstvo-primorski-ul-general-kolev-91.html): ул. Генерал Колев 91, 052 806 033 – затваря в 20:00 ч.
+- [Марешки](https://dilyanniliev.github.io/apteki/apteka/072-mareshki-bul-8-mi-primorski-polk-113.html): бул. 8-ми Приморски полк 113, 087 827 1878 – затваря в 20:00 ч.
+- [Аптека Елица – МБАЛ Св. Анна](https://dilyanniliev.github.io/apteki/apteka/073-apteka-elitsa-mbal-sv-anna-pav-2-do-dkts-4-ul-ilinden.html): пав. 2 до ДКЦ 4, ул. Илинден, 087 940 4993 – затваря в 19:30 ч.
+- [Аптека Д-р Басанович 2](https://dilyanniliev.github.io/apteki/apteka/074-apteka-d-r-basanovich-2-ul-dubrovnik-52.html): ул. Дубровник 52, 052 580 103 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/075-sopharmacy-zh-k-chayka-202.html): ж.к. Чайка 202, 088 274 0013 – затваря в 21:00 ч.
+- [Аптека МаксиФарма](https://dilyanniliev.github.io/apteki/apteka/076-apteka-maksifarma-bul-knyaz-boris-i-vi-6.html): бул. Княз Борис I-ви 6, 089 836 7618 – затваря в 17:30 ч.
+- [Биотека](https://dilyanniliev.github.io/apteki/apteka/077-bioteka-ul-georgi-s-rakovski-23.html): ул. Георги С. Раковски 23, 052 697 051 – затваря в 19:00 ч.
+- [Аптеки Здраве ЕООД – Варна](https://dilyanniliev.github.io/apteki/apteka/078-apteki-zdrave-eood-varna-bul-slivnitsa-79.html): бул. Сливница 79 – затваря в 19:00 ч.
+- [К-Крес](https://dilyanniliev.github.io/apteki/apteka/079-k-kres-bul-knyaginya-mariya-luiza-21.html): бул. Княгиня Мария Луиза 21 – затваря в 20:00 ч.
+- [Марешки Севастопол](https://dilyanniliev.github.io/apteki/apteka/080-mareshki-sevastopol-bul-knyaz-boris-i-vi-66.html): бул. Княз Борис I-ви 66, 087 987 8757 – затваря в 20:00 ч.
+- [Framar Pharmacy 49](https://dilyanniliev.github.io/apteki/apteka/081-framar-pharmacy-49-ul-druzhba-20.html): ул. Дружба 20, 089 016 3872 – затваря в 20:00 ч.
+- [Аптека Фарма Лайф 2023](https://dilyanniliev.github.io/apteki/apteka/082-apteka-farma-layf-2023-ul-debar-36.html): ул. Дебър 36, 052 809 999 – затваря в 20:00 ч.
+- [Аптека Гален](https://dilyanniliev.github.io/apteki/apteka/083-apteka-galen-ul-madara-26.html): ул. Мадара 26, 052 303 693 – затваря в 19:00 ч.
+- [Аптека Лилия](https://dilyanniliev.github.io/apteki/apteka/084-apteka-liliya-ul-doktor-anastasiya-zhelyazko.html): ул. Доктор Анастасия Желязкова 20, 088 470 7607 – затваря в 20:00 ч.
+- [Аптека Галантус](https://dilyanniliev.github.io/apteki/apteka/085-apteka-galantus-bul-knyaz-boris-i-vi-76.html): бул. Княз Борис I-ви 76, 052 625 070 – затваря в 19:00 ч.
+- [Аптека Сана Ъптаун](https://dilyanniliev.github.io/apteki/apteka/086-apteka-sana-aptaun-bul-8-mi-primorski-polk-115.html): бул. 8-ми Приморски полк 115, 052 633 030 – затваря в 20:00 ч.
+- [Гален](https://dilyanniliev.github.io/apteki/apteka/087-galen-ul-lyuben-karavelov-52.html): ул. Любен Каравелов 52, 052 644 765 – затваря в 20:00 ч.
+- [Аптека Марешки Цар Симеон](https://dilyanniliev.github.io/apteki/apteka/088-apteka-mareshki-tsar-simeon-ul-tsar-simeon-i-36.html): ул. Цар Симеон I 36, 087 887 8506 – затваря в 20:00 ч.
+- [Аптека Равиа](https://dilyanniliev.github.io/apteki/apteka/089-apteka-ravia-bul-republika-81.html): бул. Република 81, 087 660 0555 – затваря в 20:00 ч.
+- [Аптека Новела](https://dilyanniliev.github.io/apteki/apteka/090-apteka-novela-ul-ivan-katsarski-5.html): ул. Иван Кацарски 5, 087 662 0419 – затваря в 20:00 ч.
+- [Фармакон – Пехливанова, Пехливанови и Сие](https://dilyanniliev.github.io/apteki/apteka/091-farmakon-pehlivanova-pehlivanovi-i-sie-bul-8-mi-primorski-polk-119.html): бул. 8-ми Приморски полк 119, 052 303 406 – затваря в 18:00 ч.
+- [Манолова](https://dilyanniliev.github.io/apteki/apteka/092-manolova-ul-vasil-petleshkov-18.html): ул. Васил Петлешков 18, 052 912 058 – затваря в 20:30 ч.
+- [Аптека Валенс](https://dilyanniliev.github.io/apteki/apteka/093-apteka-valens-bul-tsar-osvoboditel-162-166.html): бул. Цар Освободител 162, 166 – затваря в 20:00 ч.
+- [Аптека Марешки](https://dilyanniliev.github.io/apteki/apteka/094-apteka-mareshki-bul-saborni-40.html): бул. Съборни 40, 088 470 7607 – затваря в 19:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/095-sopharmacy-ul-d-r-petar-skorchev-2.html): ул. д-р Петър Скорчев 2, 088 274 0013 – затваря в 21:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/096-sopharmacy-bul-narodni-buditeli-5.html): бул. Народни будители 5, 088 274 0013 – затваря в 20:00 ч.
+- [Аптека Равиа](https://dilyanniliev.github.io/apteki/apteka/097-apteka-ravia-ul-ana-feliksova-18.html): ул. Ана Феликсова 18 – затваря в 20:00 ч.
+- [Галена](https://dilyanniliev.github.io/apteki/apteka/098-galena-ul-ruse-17b.html): ул. Русе 17б, 052 617 447 – затваря в 20:00 ч.
+- [Аптека Поли-Валенс Чайка](https://dilyanniliev.github.io/apteki/apteka/099-apteka-poli-valens-chayka-zh-k-chayka.html): ж.к. Чайка, 052 303 805 – затваря в 20:00 ч.
+- [Аптеки Prime – Левски, Мир](https://dilyanniliev.github.io/apteki/apteka/100-apteki-prime-levski-mir-ul-mir-37.html): ул. Мир 37, 087 618 1403 – затваря в 20:00 ч.
+- [Аптека Манолова](https://dilyanniliev.github.io/apteki/apteka/101-apteka-manolova-ul-zdravko-chakarov.html): ул. Здравко Чакъров, 052 912 342 – затваря в 20:30 ч.
+- [Framar Pharmacy 43](https://dilyanniliev.github.io/apteki/apteka/102-framar-pharmacy-43-ul-nikola-y-vaptsarov-4.html): ул. Никола Й. Вапцаров 4, 089 016 3874 – затваря в 20:00 ч.
+- [Аптеки Сана](https://dilyanniliev.github.io/apteki/apteka/103-apteki-sana-ul-sveti-sveti-kiril-i-metodiy.html): ул. Свети Свети Кирил и Методий 1, 052 697 111 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/104-sopharmacy-riteyl-park-bul-primorski-park.html): Ритейл парк, бул. Приморски парк II 482, 088 274 0013 – затваря в 20:00 ч.
+- [Кактус](https://dilyanniliev.github.io/apteki/apteka/105-kaktus-ul-nikola-y-vaptsarov-7.html): ул. Никола Й. Вапцаров 7 – затваря в 20:00 ч.
+- [Аптека Матрикариа Чайка](https://dilyanniliev.github.io/apteki/apteka/106-apteka-matrikaria-chayka-zh-k-chayka-1841.html): ж.к. Чайка 1841, 052 806 051 – затваря в 20:00 ч.
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/107-sopharmacy-ul-atanas-moskov-2.html): ул. Атанас Москов 2, 088 274 0013 – затваря в 20:00 ч.
+- [Лафазанова](https://dilyanniliev.github.io/apteki/apteka/108-lafazanova-ul-debar-2.html): ул. Дебър 2, 052 632 442 – затваря в 18:00 ч.
+- [Аптека Д-р Басанович 4](https://dilyanniliev.github.io/apteki/apteka/109-apteka-d-r-basanovich-4-bul-8-mi-primorski-polk-137-vh.html): бул. 8-ми Приморски полк 137, вх. Б – затваря в 20:30 ч.
+- [Аптека Катлея 3](https://dilyanniliev.github.io/apteki/apteka/110-apteka-katleya-3-ul-atanas-tomov-10-12.html): ул. Атанас Томов 10-12
+- [SOpharmacy](https://dilyanniliev.github.io/apteki/apteka/111-sopharmacy-bul-treti-mart-77.html): бул. Трети март 77, 088 274 0013 – затваря в 20:30 ч.
+- [Аптека Катлея](https://dilyanniliev.github.io/apteki/apteka/112-apteka-katleya-zh-k-vladislav-varnenchik-234-.html): ж.к. Владислав Варненчик 234, вх. А, 088 688 6412 – затваря в 20:00 ч.
+- [Аптека Кактус](https://dilyanniliev.github.io/apteki/apteka/113-apteka-kaktus-zh-k-vladislav-varnenchik-263.html): ж.к. Владислав Варненчик 263 – затваря в 20:00 ч.
+- [Аптека Бриз](https://dilyanniliev.github.io/apteki/apteka/114-apteka-briz-varna.html): Варна – затваря в 20:00 ч.
+- [Агроаптека за вас и вашата градина](https://dilyanniliev.github.io/apteki/apteka/115-agroapteka-za-vas-i-vashata-gradina-ul-tsar-asen-i-vi-60a.html): ул. Цар Асен I-ви 60а – затваря в 19:00 ч.
+- [Аптека Марешки](https://dilyanniliev.github.io/apteki/apteka/116-apteka-mareshki-zh-k-vladislav-varnenchik-2041.html): ж.к. Владислав Варненчик 2041 – затваря в 20:00 ч.
+- [Аптека Илиева – Кайсиева градина](https://dilyanniliev.github.io/apteki/apteka/117-apteka-ilieva-kaysieva-gradina-bul-vladislav-varnenchik-ii-mr.html): бул. Владислав Варненчик, II МР, търговски комплекс 3, 087 940 4991 – затваря в 20:00 ч.
+- [Аптека Сана Бриз](https://dilyanniliev.github.io/apteki/apteka/118-apteka-sana-briz-ul-d-r-lyuben-popov-18.html): ул. Д-р Любен Попов 18, 052 580 120 – затваря в 20:00 ч.
+- [Аптека К-Крес](https://dilyanniliev.github.io/apteki/apteka/119-apteka-k-kres-zh-k-vladislav-varnenchik-409.html): ж.к. Владислав Варненчик 409 – затваря в 20:00 ч.
+- [Аптека Европа – Аспарухово](https://dilyanniliev.github.io/apteki/apteka/120-apteka-evropa-asparuhovo-bul-narodni-buditeli-2.html): бул. Народни будители 2, 052 603 062 – затваря в 19:00 ч.
+- [Аптека Марешки Чайка (сграда EOS)](https://dilyanniliev.github.io/apteki/apteka/121-apteka-mareshki-chayka-sgrada-eos-zh-k-chayka-bl-204.html): ж.к. Чайка, бл. 204, 087 887 8582 – затваря в 19:00 ч.
+- [Pharmacy Cactus](https://dilyanniliev.github.io/apteki/apteka/122-pharmacy-cactus-ul-tsar-boris-iii-ti-35.html): ул. Цар Борис III-ти 35 – затваря в 20:00 ч.
+- [Аптека Матрикариа Владиславово](https://dilyanniliev.github.io/apteki/apteka/123-apteka-matrikaria-vladislavovo-bul-sveta-elena-26.html): бул. Света Елена 26, 052 806 050 – затваря в 20:00 ч.
+- [Аптека Сана Владиславово](https://dilyanniliev.github.io/apteki/apteka/124-apteka-sana-vladislavovo-zh-k-vladislav-varnenchik.html): ж.к. Владислав Варненчик, 052 580 388 – затваря в 20:00 ч.
+- [Аптека Мегафарм](https://dilyanniliev.github.io/apteki/apteka/125-apteka-megafarm-varna.html): Варна, 089 686 8730 – затваря в 20:00 ч.
+- [Аптека Pharmacy](https://dilyanniliev.github.io/apteki/apteka/126-apteka-pharmacy-ul-tsar-boris-iii-ti-30.html): ул. Цар Борис III-ти 30, 052 808 881 – затваря в 20:00 ч.
+- [Марешки – Аспарухово](https://dilyanniliev.github.io/apteki/apteka/127-mareshki-asparuhovo-bul-narodni-buditeli-7.html): бул. Народни будители 7, 052 373 900 – затваря в 20:00 ч.
+- [Аптека Матрикариа Аспарухово](https://dilyanniliev.github.io/apteki/apteka/128-apteka-matrikaria-asparuhovo-ul-sveti-sveti-kiril-i-metodiy.html): ул. Свети Свети Кирил и Методий 45, 052 808 102 – затваря в 20:00 ч.
+- [Марешки (поликлиника, Аспарухово)](https://dilyanniliev.github.io/apteki/apteka/129-mareshki-poliklinika-asparuhovo-zh-k-asparuhovo-poliklinika.html): ж.к. Аспарухово, поликлиника, 087 887 8493 – затваря в 20:00 ч.
+- [Авицена – С. Попова](https://dilyanniliev.github.io/apteki/apteka/130-avitsena-s-popova-ul-kapitan-i-rang-g-kupov-28.html): ул. Капитан I ранг Г. Купов 28, 052 378 494 – затваря в 20:00 ч.
+- [Аптека Марешки](https://dilyanniliev.github.io/apteki/apteka/131-apteka-mareshki-ul-tsar-boris-iii-ti-37b.html): ул. Цар Борис III-ти 37Б, 087 847 6878 – затваря в 20:00 ч.
+- [Аптека Илиева – Владиславово](https://dilyanniliev.github.io/apteki/apteka/132-apteka-ilieva-vladislavovo-zh-k-vladislav-varnenchik-do-b.html): ж.к. Владислав Варненчик, до бл. 20, 087 940 4992 – затваря в 20:00 ч.
+- [Аптека Равиа (Аксаково)](https://dilyanniliev.github.io/apteki/apteka/133-apteka-ravia-aksakovo-aksakovo.html): Аксаково, 087 760 0557 – затваря в 19:00 ч.
+- [Интернешънъл Медикъл Докторс-БГ](https://dilyanniliev.github.io/apteki/apteka/134-interneshanal-medikal-doktors-bg-ul-sinchets-1.html): ул. Синчец 1, 088 821 2163
+- [Свиста](https://dilyanniliev.github.io/apteki/apteka/135-svista-ul-petar-raychev-4-vh-d.html): ул. Петър Райчев 4, вх. Д, 052 356 630
+- [Армакс](https://dilyanniliev.github.io/apteki/apteka/136-armaks-bul-tsar-osvoboditel-77.html): бул. Цар Освободител 77, 089 857 1788
+- [Аптека Ирис](https://dilyanniliev.github.io/apteki/apteka/137-apteka-iris-ul-gladston-10.html): ул. Гладстон 10, 052 322 566
+- [Ес Си Ес Франчайз Аптеки](https://dilyanniliev.github.io/apteki/apteka/138-es-si-es-franchayz-apteki-ul-tsarevets-5.html): ул. Царевец 5, 052 781 381
+- [Медимакс – М. Новицкий](https://dilyanniliev.github.io/apteki/apteka/139-medimaks-m-novitskiy-ul-roza-38.html): ул. Роза 38, 052 333 560
+- [Денонощна аптека](https://dilyanniliev.github.io/apteki/apteka/140-denonoshtna-apteka-ul-tsar-ivan-asen-ii-42.html): ул. Цар Иван Асен II 42, 087 688 0400 – Денонощно
+- [Аптека Невен](https://dilyanniliev.github.io/apteki/apteka/141-apteka-neven-ul-krastyu-mirski-11a.html): ул. Кръстю Мирски 11А, 052 600 204
+- [Аптека Европа](https://dilyanniliev.github.io/apteki/apteka/142-apteka-evropa-ul-nish-33.html): ул. Ниш 33
+
+## Бележки
+- Часът на затваряне е по данни от Google Maps; часовете на отваряне се допълват ръчно. Проверявайте по телефона.
+- Почивните дни са по Кодекса на труда (чл. 154) и решенията на Министерския съвет; учебните ваканции – по заповеди на МОН.

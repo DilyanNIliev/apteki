@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# Разрешаваме и ИИ роботите да четат сайта
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://dilyanniliev.github.io/apteki/sitemap.xml

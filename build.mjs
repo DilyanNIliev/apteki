@@ -1,6 +1,12 @@
 // Генерира data.json и страница за всяка аптека (apteka/*.html) от data/pharmacies.txt + data/overrides.json.
 // Стартиране: node build.mjs
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { createRequire } from "node:module";
+const H = createRequire(import.meta.url)("./holidays.js");
+// Адрес на сайта (за canonical, sitemap, JSON-LD). При собствен домейн: SITE_URL=https://example.bg/ node build.mjs
+const BASE = (process.env.SITE_URL || "https://dilyanniliev.github.io/apteki/").replace(/\/?$/, "/");
+const today = new Date().toISOString().slice(0, 10);
+const ld = o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`;
 
 const TR = { а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sht",ъ:"a",ь:"",ю:"yu",я:"ya" };
 const slugify = s => s.toLowerCase().split("").map(c => TR[c] ?? c).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -39,6 +45,22 @@ function hoursHtml(p) {
   if (p.close) return `Затваря в ${p.close} ч. <span class="muted">· час на отваряне: предстои да се добави</span>`;
   return `<span class="muted">—</span>`;
 }
+const plain = p => p.h24 ? "Денонощно" : p.open && p.close ? `всеки ден ${p.open}–${p.close}` : p.close ? `затваря в ${p.close} ч.` : "";
+const descr = p => `${p.name} – аптека във Варна, ${p.address}.${p.phone ? " Телефон: " + p.phone + "." : ""}${plain(p) ? " Работно време: " + plain(p).replace(/\.$/, "") + "." : ""} Карта и упътвания в Google Maps.`;
+const pageUrl = p => BASE + "apteka/" + p.slug + ".html";
+function pharmacyLd(p) {
+  const o = { "@context":"https://schema.org", "@type":"Pharmacy", name:p.name, url:pageUrl(p),
+    address:{ "@type":"PostalAddress", streetAddress:p.address, addressLocality:"Варна", addressCountry:"BG" } };
+  if (p.phone) o.telephone = "+359" + p.phone.split("/")[0].replace(/\D/g, "").replace(/^0/, "");
+  if (p.lat != null) o.geo = { "@type":"GeoCoordinates", latitude:p.lat, longitude:p.lon };
+  if (p.website) o.sameAs = [p.website];
+  if (p.h24) o.openingHoursSpecification = [{ "@type":"OpeningHoursSpecification", dayOfWeek:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], opens:"00:00", closes:"23:59" }];
+  else if (p.open && p.close) o.openingHoursSpecification = [{ "@type":"OpeningHoursSpecification", dayOfWeek:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], opens:p.open, closes:p.close }];
+  const crumbs = { "@context":"https://schema.org", "@type":"BreadcrumbList", itemListElement:[
+    { "@type":"ListItem", position:1, name:"Аптеки във Варна", item:BASE }, { "@type":"ListItem", position:2, name:p.name, item:pageUrl(p) }] };
+  delete o["@context"]; delete crumbs["@context"];
+  return { "@context":"https://schema.org", "@graph":[o, crumbs] };
+}
 const theme = `<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>`;
 
 rmSync("apteka", { recursive: true, force: true });
@@ -50,8 +72,14 @@ for (const p of list) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(p.name)} – ${esc(p.address)}, Варна</title>
-<meta name="description" content="${esc(p.name)}, ${esc(p.address)}, Варна. Телефон, работно време и карта.">
+<title>${esc(p.name)} – ${esc(p.address)}, Варна | Телефон и работно време</title>
+<meta name="description" content="${esc(descr(p))}">
+<link rel="canonical" href="${esc(BASE + "apteka/" + p.slug + ".html")}">
+<meta property="og:type" content="website"><meta property="og:locale" content="bg_BG">
+<meta property="og:title" content="${esc(p.name)} – ${esc(p.address)}, Варна"><meta property="og:description" content="${esc(descr(p))}">
+<meta property="og:url" content="${esc(BASE + "apteka/" + p.slug + ".html")}">
+<meta name="twitter:card" content="summary">
+${ld(pharmacyLd(p))}
 <link rel="stylesheet" href="../style.css">
 ${theme}
 </head>
@@ -91,3 +119,86 @@ document.getElementById("state").innerHTML = st === true ? '<span class="badge">
 }
 writeFileSync("data.json", JSON.stringify(list));
 console.log(`Генерирани ${list.length} аптеки.`);
+
+// ---------- SEO за началната страница ----------
+const sub = (file, name, html) => {
+  const s = readFileSync(file, "utf8"), re = new RegExp(`<!--${name}-->[\\s\\S]*?<!--/${name}-->`);
+  if (!re.test(s)) throw new Error(`Липсва маркер ${name} във ${file}`);
+  writeFileSync(file, s.replace(re, () => `<!--${name}-->${html}<!--/${name}-->`));
+};
+const open24 = list.filter(p => p.h24);
+const meta = (path, title, desc) => `<link rel="canonical" href="${esc(BASE + path)}">
+<meta name="description" content="${esc(desc)}">
+<meta property="og:type" content="website"><meta property="og:locale" content="bg_BG"><meta property="og:site_name" content="Аптеки във Варна">
+<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(BASE + path)}">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">`;
+sub("index.html", "META", meta("", "Аптеки във Варна – работно време, телефони и карта", `Всички аптеки във Варна: ${list.length} адреса с телефон, работно време и карта. Денонощни аптеки, отворени сега и най-близка до теб.`));
+sub("index.html", "LD", ld({ "@context":"https://schema.org", "@graph":[
+  { "@type":"WebSite", name:"Аптеки във Варна", url:BASE, inLanguage:"bg" },
+  { "@type":"ItemList", name:"Аптеки във Варна", numberOfItems:list.length,
+    itemListElement:list.map((p, i) => ({ "@type":"ListItem", position:i + 1, url:pageUrl(p), name:`${p.name} – ${p.address}` })) },
+  { "@type":"FAQPage", mainEntity:[
+    { "@type":"Question", name:"Кои са денонощните аптеки във Варна?", acceptedAnswer:{ "@type":"Answer", text:"Денонощни аптеки във Варна: " + open24.map(p => `${p.name} (${p.address}${p.phone ? ", тел. " + p.phone : ""})`).join("; ") + "." } },
+    { "@type":"Question", name:"Колко аптеки има в списъка?", acceptedAnswer:{ "@type":"Answer", text:`В сайта са събрани ${list.length} аптеки във Варна с адрес, телефон, работно време и карта.` } },
+    { "@type":"Question", name:"Как да намеря най-близката аптека?", acceptedAnswer:{ "@type":"Answer", text:"Натиснете бутона „Най-близка до мен“ и разрешете достъп до местоположението – аптеките се подреждат по разстояние." } }
+  ] } ] }));
+sub("index.html", "SEOLIST", `
+<section class="card seo" id="all-links">
+  <h2>Всички аптеки във Варна – списък с адреси и телефони</h2>
+  <p class="muted">Каталог на ${list.length} аптеки във Варна с адрес, телефон, работно време и карта. Денонощни аптеки: ${open24.map(p => esc(p.name) + ", " + esc(p.address)).join("; ")}.</p>
+  <ul class="linklist">${list.map(p => `<li><a href="apteka/${p.slug}.html">${esc(p.name)}</a> – ${esc(p.address)}${p.phone ? ", " + esc(p.phone) : ""}</li>`).join("")}</ul>
+</section>`);
+
+// ---------- SEO за страницата с почивните дни (3 години, статично) ----------
+const todayY = +today.slice(0, 4), years = [todayY - 1, todayY, todayY + 1];
+const fmt = d => `${d.getDate()} ${H.MON[d.getMonth()].toLowerCase()}`;
+const holIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const yearBlocks = years.map(y => {
+  const hs = H.holidays(y), easter = H.orthodoxEaster(y), offs = hs.filter(h => h.off);
+  return { y, hs, easter, offs, school: H.schoolEvents(y).filter(e => e.kind === "vacation") };
+});
+sub("pochivni-dni.html", "META", meta("pochivni-dni.html", `Почивни дни ${years.join(", ")} в България – празници, учебни ваканции и отпуска`, `Официални почивни дни и празници в България за ${years.join(", ")}, учебни ваканции по МОН и най-изгодните комбинации за отпуска, за да почиваш по-дълго.`));
+sub("pochivni-dni.html", "LD", ld({ "@context":"https://schema.org", "@graph":[
+  { "@type":"WebPage", name:"Почивни дни в България", url:BASE + "pochivni-dni.html", inLanguage:"bg", dateModified:today },
+  { "@type":"FAQPage", mainEntity: yearBlocks.flatMap(({ y, hs, easter, offs, school }) => [
+    { "@type":"Question", name:`Кои са официалните почивни дни през ${y} г. в България?`, acceptedAnswer:{ "@type":"Answer",
+      text: hs.map(h => `${fmt(h.date)} (${H.DOW[h.date.getDay()].toLowerCase()}) – ${h.name}`).join("; ") + "." } },
+    { "@type":"Question", name:`Кога е Великден през ${y} г.?`, acceptedAnswer:{ "@type":"Answer", text:`Православният Великден през ${y} г. е на ${fmt(easter)} (${H.DOW[easter.getDay()].toLowerCase()}). Официалните почивни дни са от Велики петък до Великденски понеделник.` } },
+    { "@type":"Question", name:`Кога са учебните ваканции през ${y} г.?`, acceptedAnswer:{ "@type":"Answer", text: school.map(e => `${e.name}: ${fmt(e.fromD)}${e.from === e.to ? "" : " – " + fmt(e.toD)}${e.toD.getFullYear() !== y ? " " + e.toD.getFullYear() : ""}`).join("; ") + "." } }
+  ]) },
+  ...yearBlocks.flatMap(({ hs }) => hs.map(h => ({ "@type":"Event", name:h.name, startDate:holIso(h.date), endDate:holIso(h.date),
+    eventAttendanceMode:"https://schema.org/OfflineEventAttendanceMode", eventStatus:"https://schema.org/EventScheduled",
+    location:{ "@type":"Country", name:"България" } })))
+] }));
+sub("pochivni-dni.html", "SEOFAQ", `
+<section class="card seo" id="faq">
+  <h2>Често задавани въпроси за почивните дни</h2>
+  ${yearBlocks.map(({ y, hs, easter, offs, school }) => `<h3>Почивни дни ${y}</h3>
+  <p>През ${y} г. официалните празници и почивни дни в България са ${hs.length}: ${hs.map(h => `${fmt(h.date)} (${H.DOW[h.date.getDay()].toLowerCase()}) – ${esc(h.name)}`).join("; ")}. Православният Великден е на ${fmt(easter)}.</p>
+  <p>Учебни ваканции през ${y} г.: ${school.map(e => `${esc(e.name)} – ${fmt(e.fromD)}${e.from === e.to ? "" : " до " + fmt(e.toD)}`).join("; ")}.</p>`).join("\n  ")}
+</section>`);
+
+// ---------- sitemap, robots, llms.txt ----------
+const urls = [BASE, BASE + "pochivni-dni.html", ...list.map(pageUrl)];
+writeFileSync("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u, i) => `  <url><loc>${esc(u)}</loc><lastmod>${today}</lastmod><priority>${i < 2 ? "1.0" : "0.6"}</priority></url>`).join("\n")}\n</urlset>\n`);
+writeFileSync("robots.txt", `User-agent: *\nAllow: /\nDisallow: /admin.html\n\n# Разрешаваме и ИИ роботите да четат сайта\nUser-agent: GPTBot\nAllow: /\nUser-agent: ClaudeBot\nAllow: /\nUser-agent: PerplexityBot\nAllow: /\nUser-agent: Google-Extended\nAllow: /\nDisallow: /admin.html\n\nSitemap: ${BASE}sitemap.xml\n`);
+writeFileSync("llms.txt", `# Аптеки във Варна и почивни дни
+
+> Каталог на ${list.length} аптеки във Варна (адрес, телефон, работно време, карта) и календар с официалните почивни дни, учебните ваканции и препоръки за отпуска в България.
+
+## Страници
+- [Аптеки във Варна](${BASE}): търсене и филтри – работят сега, денонощни, най-близка до мен
+- [Почивни дни в България](${BASE}pochivni-dni.html): празници за ${years.join(", ")}, учебни ваканции и най-изгодни комбинации за отпуска
+- [Данни за аптеките (JSON)](${BASE}data.json): всички аптеки като структурирани данни
+
+## Денонощни аптеки във Варна
+${open24.map(p => `- [${p.name}](${pageUrl(p)}): ${p.address}${p.phone ? ", " + p.phone : ""}`).join("\n")}
+
+## Всички аптеки
+${list.map(p => `- [${p.name}](${pageUrl(p)}): ${p.address}${p.phone ? ", " + p.phone : ""}${plain(p) ? " – " + plain(p) : ""}`).join("\n")}
+
+## Бележки
+- Часът на затваряне е по данни от Google Maps; часовете на отваряне се допълват ръчно. Проверявайте по телефона.
+- Почивните дни са по Кодекса на труда (чл. 154) и решенията на Министерския съвет; учебните ваканции – по заповеди на МОН.
+`);
+console.log(`SEO: sitemap (${urls.length} адреса), robots.txt, llms.txt.`);
