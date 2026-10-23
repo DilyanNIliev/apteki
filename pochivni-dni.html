@@ -20,7 +20,7 @@
 </header>
 <main>
   <section class="card"><div class="hol-list" id="list"></div></section>
-  <div class="legend"><span><i style="background:var(--warn)"></i>Официален празник</span><span><i style="background:var(--accent)"></i>Компенсиран почивен ден</span><span><i style="outline:2px solid var(--text)"></i>Днес</span></div>
+  <div class="legend"><span><i style="background:var(--warn)"></i>Официален празник</span><span><i style="background:var(--accent)"></i>Компенсиран почивен ден</span><span><i style="background:var(--leave)"></i>Препоръчан отпуск</span><span><i style="outline:2px solid var(--text)"></i>Днес</span></div>
   <section class="card tips">
     <h2>Как да комбинираш отпуска и да почиваш по-дълго</h2>
     <p class="muted">Идеята е да „залепиш“ платен отпуск към празници и уикенди, така че с малко дни отпуска да получиш повече поредни почивни дни. Ето най-изгодните комбинации за <b class="yr"></b> г.:</p>
@@ -34,6 +34,7 @@
     </ul>
   </section>
   <div class="months" id="months"></div>
+  <section class="card tips" id="summary"></section>
   <p class="note" id="notes"></p>
 </main>
 </div>
@@ -92,17 +93,25 @@ function render() {
   $("list").innerHTML = hs.map(h => `<div class="hol ${h.iso < todayIso ? "past" : ""}">
       <div class="d">${h.date.getDate()} ${MON[h.date.getMonth()]}, ${DOW[h.date.getDay()]}</div>
       <div>${esc(h.name)}${h.off ? ' <span class="badge">почивен ден</span>' : ' <span class="badge closed">празник</span>'}</div></div>`).join("");
+  const picked = renderTrips(hs), leave = {};
+  picked.forEach(c => c.used.forEach(d => { leave[iso(d)] = c; }));
   $("months").innerHTML = MON.map((name, m) => {
     const first = new Date(year, m, 1), pad = (first.getDay() + 6) % 7, days = new Date(year, m + 1, 0).getDate();
     let cells = ["Пн","Вт","Ср","Чт","Пт","Сб","Нд"].map(x => `<span class="dow">${x}</span>`).join("") + "<span></span>".repeat(pad);
     for (let d = 1; d <= days; d++) {
       const dt = new Date(year, m, d), key = iso(dt), h = map[key];
-      const cls = [h ? (h.off ? "off" : "ph") : [0,6].includes(dt.getDay()) ? "we" : "", key === todayIso ? "today" : ""].join(" ");
-      cells += `<span class="${cls}" ${h ? `title="${esc(h.name)}"` : ""}>${d}</span>`;
+      const lv = leave[key];
+      const cls = [h ? (h.off ? "off" : "ph") : lv ? "leave" : [0,6].includes(dt.getDay()) ? "we" : "", key === todayIso ? "today" : ""].join(" ");
+      const tip = h ? h.name : lv ? "Препоръчан отпуск – " + lv.len + " дни почивка" : "";
+      cells += `<span class="${cls}" ${tip ? `title="${esc(tip)}"` : ""}>${d}</span>`;
     }
     return `<div class="card month"><h3>${name}</h3><div class="cal">${cells}</div></div>`;
   }).join("");
-  renderTrips(hs);
+  const total = picked.reduce((a, c) => a + c.leave, 0), rest = picked.reduce((a, c) => a + c.len, 0);
+  const fd = d => d.getDate() + " " + MON[d.getMonth()].toLowerCase();
+  $("summary").innerHTML = picked.length ? `<h2>Избрани дни отпуска за ${year}</h2>
+    <p class="muted">Общо <b>${total}</b> дни платен отпуск, с които получаваш <b>${rest}</b> дни почивка на ${picked.length} пъти.</p>
+    <ul class="tipsList">${picked.map(c => `<li class="${iso(c.e) < todayIso ? "past" : ""}"><b>${fd(c.s)} – ${fd(c.e)}</b> (${c.len} дни): отпуска ${c.used.map(fd).join(", ")}</li>`).join("")}</ul>` : "";
   const n = hs.length;
   $("notes").textContent = "Общо " + n + " неработни дни в списъка за " + year + " г. Ако празник (без Великденските) се падне в събота или неделя, почива се на следващия работен ден. Официалният списък се определя от Кодекса на труда и решенията на Министерския съвет – при съмнение провери в Държавен вестник.";
 }
@@ -138,6 +147,7 @@ function renderTrips(hs) {
       <div><b>${f(c.s)} – ${f(c.e)}</b></div>
       <div class="muted">Вземи ${c.leave} ${c.leave === 1 ? "ден" : "дни"} отпуска: ${c.used.map(f).join(", ")}</div>
     </div>`).join("") : "<p class='muted'>Няма подходящи комбинации.</p>";
+  return picked;
 }
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
