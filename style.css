@@ -99,3 +99,9 @@ button.primary { border-radius:999px; padding:10px 18px; font-weight:600; }
 .hol.past { opacity:.5; filter:grayscale(.6); }
 .cal span { border-radius:6px; }
 .month h3 { color:var(--accent); }
+.tips { margin-top:16px; }
+.trips { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); margin:12px 0; }
+.trip { border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:10px 12px; background:var(--bg); }
+.trip .big { font-weight:700; color:var(--accent); font-size:1.05rem; }
+.trip.past { opacity:.5; filter:grayscale(.6); }
+.tipsList { color:var(--muted); padding-left:20px; margin:8px 0 0; }
