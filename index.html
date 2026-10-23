@@ -4,36 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Аптеки във Варна</title>
-<style>
-  :root { --bg:#f5f8f6; --card:#fff; --text:#1c2b24; --muted:#5f6f67; --accent:#0a8f5b; --line:#dde6e1; --warn:#c0392b; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg:#111915; --card:#1a251f; --text:#e6efe9; --muted:#9db0a5; --accent:#3ccf91; --line:#2a3a31; --warn:#ff7b6b; }
-  }
-  :root[data-theme="dark"] { --bg:#111915; --card:#1a251f; --text:#e6efe9; --muted:#9db0a5; --accent:#3ccf91; --line:#2a3a31; --warn:#ff7b6b; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:16px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
-  header, main, footer { max-width:960px; margin:0 auto; padding:16px; }
-  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-  h1 { margin:8px 0 4px; }
-  .sub { color:var(--muted); margin:0 0 16px; }
-  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:8px; padding:8px 12px; }
-  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .controls { display:flex; gap:10px 16px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-  input[type=search] { flex:1 1 220px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--text); font:inherit; }
-  label { display:flex; gap:6px; align-items:center; }
-  #status { color:var(--muted); margin:0 0 12px; min-height:1.5em; }
-  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
-  .card h2 { font-size:1.1rem; margin:0 0 6px; }
-  .badge { display:inline-block; font-size:.72rem; color:#fff; background:var(--accent); border-radius:99px; padding:1px 8px; margin:0 4px 4px 0; vertical-align:middle; }
-  .badge.closed { background:var(--warn); }
-  .badge.alt { background:var(--muted); }
-  .row { margin:4px 0; color:var(--muted); }
-  .row b { color:var(--text); font-weight:600; }
-  .links { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
-  a { color:var(--accent); }
-  .note { color:var(--muted); font-size:.9rem; }
-</style>
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
 <header>
@@ -41,11 +13,11 @@
     <h1>Аптеки във Варна</h1>
     <button id="theme" type="button" aria-label="Смяна на режима"></button>
   </div>
-  <p class="sub">Работно време, телефон, Google Maps и уебсайт.</p>
+  <p class="sub">Телефон, адрес, работно време и карта за всяка аптека.</p>
 </header>
 <main>
   <div class="controls">
-    <input type="search" id="q" placeholder="Търси по име или адрес…" aria-label="Търсене">
+    <input type="search" id="q" placeholder="Търси по име, адрес или телефон…" aria-label="Търсене">
     <button id="locate" class="primary" type="button">📍 Най-близка до мен</button>
   </div>
   <div class="controls">
@@ -56,161 +28,37 @@
   </div>
   <p id="status" role="status"></p>
   <div class="grid" id="list"></div>
-  <p class="note">Списъкът се зарежда от OpenStreetMap и не съвпада напълно с Google – липсващите аптеки и часове ще бъдат допълнени.</p>
-  <p class="note">Работното време може да се е променило – обади се преди посещение. „—“ означава непотвърдени данни; такива аптеки не попадат във филтрите „Работят сега“, „Приготвят лекарства“ и „Работят на празници“.</p>
+  <p class="note">Часът на затваряне е по данни от Google Maps към деня на проверката. „Работят сега“ показва само аптеки с известни час на отваряне и затваряне. Обади се преди посещение.</p>
 </main>
+<script src="common.js"></script>
 <script>
-// Дни: 0 = неделя … 6 = събота. sched: [дни, "откр", "закр"]
-const ALL = [0,1,2,3,4,5,6];
-const pharmacies = [
-  { name:"Аптека Окръжна (Валя Дечева)", address:"бул. Цар Освободител 77А", phone:"052 612 008", h24:true, holiday:true, website:"https://aptekavarna.com/" },
-  { name:"Аптека Живита", address:"бул. Владислав Варненчик 65", phone:"052 607 033", h24:true, holiday:true },
-  { name:"Санита 98", address:"бул. Владислав Варненчик 12", phone:"052 825 205 / 0888 604 119", h24:true, holiday:true },
-  { name:"Санита", address:"бул. Генерал Колев 72", h24:true, holiday:true },
-  { name:"Фармедия", address:"кв. Чайка, бл. 204", h24:true, holiday:true },
-  { name:"Аптека Попова", address:"ул. 27-ми Юли 16", phone:"052 616 050",
-    sched:[[[1,2,3,4,5],"09:00","20:00"],[[6],"10:00","19:00"],[[0],"10:00","18:00"]] },
-  { name:"Subra – МОЛ Варна", address:"бул. Владислав Варненчик 186", phone:"052 576 716", sched:[[ALL,"10:00","22:00"]] },
-  { name:"Subra – Grand Mall Varna", address:"ул. Андрей Сахаров 2", phone:"0885 280 933", sched:[[ALL,"10:00","22:00"]],
-    website:"https://www.grandmall-varna.com/bg/99/apteka/subra" },
-  { name:"Subra – Delta Planet Mall", address:"бул. Сливница 185", phone:"0878 588 624" }
-];
-// compound: true = приготвя лекарства; holiday: true = работи на празници. Липсва = непотвърдено.
+let pharmacies = [], user = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const statusEl = $("status");
 
-const DAYS = ["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
-const toMin = t => { const [h,m] = t.split(":").map(Number); return h*60+m; };
-// p.days: { 0..6: [[отваряне_мин, затваряне_мин], …] } – липсващ ден = затворено
-for (const p of pharmacies) {
-  if (!p.sched) continue;
-  p.days = {};
-  for (const [ds,o,c] of p.sched) for (const d of ds) p.days[d] = [[toMin(o), toMin(c)]];
-}
-
-// ---- OpenStreetMap: всички аптеки във Варна, зареждани в браузъра ----
-const OH = {Su:0,Mo:1,Tu:2,We:3,Th:4,Fr:5,Sa:6};
-function parseOH(str) {
-  const s = str.trim();
-  if (s === "24/7") return { h24:true, holiday:true };
-  const days = {}, res = {};
-  for (const raw of s.split(";")) {
-    const m = raw.trim().match(/^([A-Za-z,\- ]*?)\s*((?:\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}\s*,?\s*)+|off|closed)?$/);
-    if (!raw.trim()) continue;
-    if (!m) return null;
-    const spec = m[1].replace(/\s/g, ""), body = m[2];
-    const iv = !body || /^(off|closed)$/.test(body) ? [] : body.split(",").map(x => {
-      const [o,c] = x.trim().split("-").map(t => toMin(t.trim()));
-      return [o, c <= o ? 1440 : c];
-    });
-    if (!body && spec) return null;
-    const target = [];
-    if (!spec) target.push(0,1,2,3,4,5,6);
-    for (const part of spec.split(",").filter(Boolean)) {
-      if (part === "PH") { res.holiday = iv.length > 0; continue; }
-      const [a,b] = part.split("-");
-      if (!(a in OH) || (b && !(b in OH))) return null;
-      let d = OH[a]; target.push(d);
-      while (b && d !== OH[b]) { d = (d + 1) % 7; target.push(d); }
-    }
-    for (const d of target) days[d] = iv;
-  }
-  if (!Object.keys(days).length) return null;
-  res.days = days;
-  return res;
-}
-const digits = s => (s || "").replace(/\D/g, "").replace(/^(00)?359/, "0");
-const addrKey = s => (s || "").toLowerCase().replace(/бул\.|ул\.|булевард|улица|[^а-я0-9]/g, "");
-function fromOSM(el) {
-  const t = el.tags || {}, c = el.center || el;
-  const street = t["addr:street"] ? t["addr:street"] + (t["addr:housenumber"] ? " " + t["addr:housenumber"] : "") : "";
-  const p = {
-    name: t.name || t["name:bg"] || t.brand || t.operator || "Аптека",
-    address: street || t["addr:place"] || t["addr:suburb"] || "адресът не е посочен в OpenStreetMap",
-    phone: t.phone || t["contact:phone"],
-    website: t.website || t["contact:website"],
-    coord: [c.lat, c.lon], osm: true
-  };
-  if (p.website && !/^https?:\/\//.test(p.website)) p.website = "http://" + p.website;
-  if (t.opening_hours) {
-    const oh = parseOH(t.opening_hours);
-    if (oh) { if (oh.h24) { p.h24 = true; p.holiday = true; } else { p.days = oh.days; if (oh.holiday != null) p.holiday = oh.holiday; } }
-    p.ohRaw = t.opening_hours;
-  }
-  return p;
-}
-async function loadOSM() {
-  let els;
-  try {
-    const c = JSON.parse(localStorage.getItem("osm") || "null");
-    if (c && Date.now() - c.t < 864e5) els = c.els;
-  } catch (e) {}
-  if (!els) {
-    const q = '[out:json][timeout:60];nwr["amenity"="pharmacy"](43.13,27.75,43.30,28.05);out center tags;';
-    const r = await fetch("https://overpass-api.de/api/interpreter", { method:"POST", body:"data=" + encodeURIComponent(q) });
-    els = (await r.json()).elements;
-    try { localStorage.setItem("osm", JSON.stringify({ t:Date.now(), els })); } catch (e) {}
-  }
-  const known = pharmacies.slice();
-  for (const el of els) {
-    const p = fromOSM(el);
-    const dup = known.find(k => (digits(k.phone) && digits(k.phone) === digits(p.phone)) || (k.address.length > 6 && addrKey(k.address) === addrKey(p.address)));
-    if (dup) { dup.coord = dup.coord || p.coord; dup.website = dup.website || p.website; continue; }
-    pharmacies.push(p);
-  }
-  return els.length;
-}
-function sofiaNow() {
-  const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone:"Europe/Sofia", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false })
-    .formatToParts(new Date()).map(x => [x.type, x.value]));
-  return { day:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(p.weekday), min:(+p.hour % 24)*60 + +p.minute };
-}
-function isOpen(p, now) {
-  if (p.h24) return true;
-  if (!p.days) return null;
-  return (p.days[now.day] || []).some(([o,c]) => now.min >= o && now.min < c);
-}
-const hhmm = m => String(Math.floor(m/60) % 24).padStart(2,"0") + ":" + String(m%60).padStart(2,"0");
 function hoursText(p) {
+  if (p.closedTemp) return "Временно затворена";
   if (p.h24) return "Денонощно";
-  if (!p.days) return "—";
-  const txt = d => (p.days[d] || []).map(([o,c]) => hhmm(o) + "–" + (c === 1440 ? "24:00" : hhmm(c))).join(", ") || "почивен";
-  const order = [1,2,3,4,5,6,0], groups = [];
-  for (const d of order) {
-    const last = groups[groups.length-1];
-    if (last && last.t === txt(d)) last.end = d; else groups.push({ start:d, end:d, t:txt(d) });
-  }
-  if (groups.length === 1) return "Всеки ден " + groups[0].t;
-  return groups.map(g => (g.start === g.end ? DAYS[g.start] : DAYS[g.start] + "–" + DAYS[g.end]) + " " + g.t).join(", ");
+  if (p.open && p.close) return "Всеки ден " + p.open + "–" + p.close;
+  return p.close ? "Затваря в " + p.close + " ч." : "—";
 }
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-// ---- тема ----
-const root = document.documentElement, themeBtn = document.getElementById("theme");
-function effectiveTheme() { const t = root.dataset.theme; return t === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : t; }
-function paintThemeBtn() { themeBtn.textContent = effectiveTheme() === "dark" ? "☀️ Дневен" : "🌙 Нощен"; }
-try { const s = localStorage.getItem("theme"); if (s) root.dataset.theme = s; } catch (e) {}
-themeBtn.onclick = () => {
-  root.dataset.theme = effectiveTheme() === "dark" ? "light" : "dark";
-  try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
-  paintThemeBtn();
-};
-paintThemeBtn();
 
 // ---- местоположение: адресите се геокодират в браузъра (Nominatim) и се кешират ----
-let user = null;
 const coords = {};
 try { Object.assign(coords, JSON.parse(localStorage.getItem("coords") || "{}")); } catch (e) {}
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function geocode(p) {
-  const key = p.address;
-  if (key in coords) return coords[key];
-  const street = p.address.replace(/^(бул\.|ул\.|кв\.)\s*/, "");
+  if (p.lat != null) return [p.lat, p.lon];
+  if (p.address in coords) return coords[p.address];
+  const street = p.address.replace(/^(бул\.|ул\.|ж\.к\.|кв\.)\s*/, "").replace(/,.*$/, "");
   let hit = null;
   try {
     const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=bg&q=" + encodeURIComponent(street + ", Варна, България"));
     const j = await r.json();
     if (j[0]) hit = [+j[0].lat, +j[0].lon];
   } catch (e) { return undefined; }
-  coords[key] = hit;
+  coords[p.address] = hit;
   try { localStorage.setItem("coords", JSON.stringify(coords)); } catch (e) {}
   await sleep(1100);
   return hit;
@@ -220,31 +68,29 @@ function km(a, b) {
   const h = Math.sin(dLat/2)**2 + Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(h));
 }
-const statusEl = document.getElementById("status");
-document.getElementById("locate").onclick = () => {
+$("locate").onclick = () => {
   if (!navigator.geolocation) { statusEl.textContent = "Браузърът не поддържа определяне на местоположение."; return; }
   statusEl.textContent = "Чакам разрешение за местоположение…";
   navigator.geolocation.getCurrentPosition(async pos => {
     user = [pos.coords.latitude, pos.coords.longitude];
-    for (const p of pharmacies) if (p.coord) p.dist = km(user, p.coord);
-    render();
-    for (const p of pharmacies.filter(p => !p.coord && !p.osm)) {
-      statusEl.textContent = "Определям разстоянията… (" + p.name + ")";
+    let done = 0;
+    // първо вече известните адреси (кеш), после останалите – едно по едно, за да не претоварваме услугата
+    const order = pharmacies.slice().sort((a, b) => ((b.address in coords || b.lat != null) - (a.address in coords || a.lat != null)));
+    for (const p of order) {
       const c = await geocode(p);
-      if (c) { p.coord = c; p.dist = km(user, c); }
-      render();
+      if (c) p.dist = km(user, c);
+      if (++done % 5 === 0 || done === order.length) { statusEl.textContent = "Определям разстоянията… " + done + "/" + order.length; render(); }
     }
-    statusEl.textContent = pharmacies.some(p => p.dist != null) ? "Подредено по разстояние до теб (по права линия)." : "Не успях да определя адресите на картата.";
+    statusEl.textContent = "Подредено по разстояние до теб (по права линия). Аптеки без разпознат адрес са най-отзад.";
     render();
   }, err => { statusEl.textContent = err.code === 1 ? "Няма разрешение за местоположение." : "Местоположението не може да бъде определено."; });
 };
 
 // ---- списък ----
-const $ = id => document.getElementById(id);
 function render() {
   const q = $("q").value.trim().toLowerCase(), now = sofiaNow();
   let items = pharmacies.filter(p =>
-    (p.name + " " + p.address).toLowerCase().includes(q) &&
+    (p.name + " " + p.address + " " + p.phone).toLowerCase().includes(q) &&
     (!$("f24").checked || p.h24) &&
     (!$("fOpen").checked || isOpen(p, now) === true) &&
     (!$("fCompound").checked || p.compound) &&
@@ -252,28 +98,22 @@ function render() {
   if (user) items = items.slice().sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
   $("list").innerHTML = items.length ? items.map(p => {
     const open = isOpen(p, now);
-    const map = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.name + ", " + p.address + ", Варна");
+    const page = "apteka/" + p.slug + ".html";
     return `<article class="card">
-      <h2>${esc(p.name)}</h2>
+      <h2><a href="${esc(page)}">${esc(p.name)}</a></h2>
       <div>${open === true ? '<span class="badge">Отворено</span>' : open === false ? '<span class="badge closed">Затворено</span>' : ""}
         ${p.h24 ? '<span class="badge alt">24ч</span>' : ""}${p.compound ? '<span class="badge alt">Приготвя лекарства</span>' : ""}${p.holiday ? '<span class="badge alt">Работи на празници</span>' : ""}</div>
-      <div class="row"><b>Адрес:</b> ${esc(p.address)}, Варна${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
+      <div class="row"><b>Адрес:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
       <div class="row"><b>Работно време:</b> ${esc(hoursText(p))}</div>
-      <div class="row"><b>Телефон:</b> ${p.phone ? `<a href="tel:${esc(p.phone.split("/")[0].replace(/\s/g, ""))}">${esc(p.phone)}</a>` : "—"}</div>
-      <div class="links"><a href="${map}" target="_blank" rel="noopener">Google Maps</a>
-        ${p.website ? `<a href="${esc(p.website)}" target="_blank" rel="noopener">Уебсайт</a>` : '<span class="row">Уебсайт: —</span>'}</div>
+      <div class="row"><b>Телефон:</b> ${p.phone ? `<a href="tel:${esc(p.phone.replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</div>
+      <div class="links"><a href="${esc(page)}">Подробности и карта</a></div>
     </article>`;
   }).join("") : "<p>Няма резултати.</p>";
+  if (!user) statusEl.textContent = items.length + " от " + pharmacies.length + " аптеки.";
 }
 ["q","fOpen","f24","fCompound","fHoliday"].forEach(id => $(id).addEventListener("input", render));
-render();
-setInterval(render, 60000);
-statusEl.textContent = "Зареждам всички аптеки от OpenStreetMap…";
-loadOSM().then(n => {
-  statusEl.textContent = "Заредени аптеки: " + pharmacies.length + " (OpenStreetMap: " + n + ").";
-  if (user) for (const p of pharmacies) if (p.coord) p.dist = km(user, p.coord);
-  render();
-}).catch(() => { statusEl.textContent = "Не успях да заредя пълния списък от OpenStreetMap – показвам само потвърдените аптеки."; });
+fetch("data.json").then(r => r.json()).then(d => { pharmacies = d; render(); setInterval(render, 60000); })
+  .catch(() => { statusEl.textContent = "Списъкът не може да се зареди."; });
 </script>
 </body>
 </html>
