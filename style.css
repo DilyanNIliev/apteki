@@ -1,0 +1,32 @@
+:root { --bg:#f5f8f6; --card:#fff; --text:#1c2b24; --muted:#5f6f67; --accent:#0a8f5b; --line:#dde6e1; --warn:#c0392b; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg:#111915; --card:#1a251f; --text:#e6efe9; --muted:#9db0a5; --accent:#3ccf91; --line:#2a3a31; --warn:#ff7b6b; }
+}
+:root[data-theme="dark"] { --bg:#111915; --card:#1a251f; --text:#e6efe9; --muted:#9db0a5; --accent:#3ccf91; --line:#2a3a31; --warn:#ff7b6b; }
+* { box-sizing:border-box; }
+body { margin:0; font:16px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
+header, main { max-width:960px; margin:0 auto; padding:16px; }
+.top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+h1 { margin:8px 0 4px; }
+.sub, .muted, .note { color:var(--muted); }
+.note { font-size:.9rem; }
+button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:8px; padding:8px 12px; }
+button.primary, .btn { background:var(--accent); color:#fff; border:1px solid var(--accent); }
+.btn { display:inline-block; text-decoration:none; border-radius:8px; padding:8px 14px; }
+.controls { display:flex; gap:10px 16px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+input[type=search] { flex:1 1 220px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--text); font:inherit; }
+label { display:flex; gap:6px; align-items:center; }
+#status { color:var(--muted); margin:0 0 12px; min-height:1.5em; }
+.grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+.card h2 { font-size:1.1rem; margin:0 0 6px; }
+.card h2 a { color:var(--text); text-decoration:none; }
+.badge { display:inline-block; font-size:.72rem; color:#fff; background:var(--accent); border-radius:99px; padding:1px 8px; margin:0 4px 4px 0; vertical-align:middle; }
+.badge.closed { background:var(--warn); }
+.badge.alt { background:var(--muted); }
+.row { margin:4px 0; color:var(--muted); }
+.row b { color:var(--text); font-weight:600; }
+.info .row { display:grid; grid-template-columns:130px 1fr; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); margin:0; color:var(--text); }
+.links { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+a { color:var(--accent); }
+.map { width:100%; height:380px; border:1px solid var(--line); border-radius:12px; margin-top:16px; background:var(--card); }
