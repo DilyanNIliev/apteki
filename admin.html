@@ -38,13 +38,23 @@
       <input type="time" id="bulkOpen">
       <button type="button" id="bulkApply">Приложи</button>
       <span style="flex:1"></span>
-      <button type="button" class="primary" id="dl">⬇ Свали overrides.json</button>
+      <button type="button" class="primary" id="save">💾 Запази в сайта</button>
+      <button type="button" id="dl">⬇ Свали overrides.json</button>
       <button type="button" id="copy">Копирай</button>
       <button type="button" id="imp">Импортирай</button>
       <button type="button" id="reset">Изчисти чернова</button>
     </div>
     <p id="status" role="status"></p>
   </div>
+  <details id="tokenBox">
+    <summary>Настройка за запис в GitHub (еднократно)</summary>
+    <p class="note">В GitHub: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: само <b>apteki</b>; Permissions → Repository permissions → <b>Contents: Read and write</b>. Поставяш токена тук – пази се само в този браузър и се праща само към api.github.com.</p>
+    <div class="bulk">
+      <input type="password" id="token" placeholder="github_pat_…" autocomplete="off" style="flex:1;min-width:220px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">
+      <button type="button" id="tokenSave">Запомни токена</button>
+      <button type="button" id="tokenForget">Забрави</button>
+    </div>
+  </details>
   <div id="importBox" hidden>
     <p class="note">Постави JSON от overrides.json и натисни „Зареди“.</p>
     <textarea class="json" id="importText"></textarea>
@@ -120,6 +130,40 @@ $("bulkApply").onclick = () => {
   for (const p of targets) (draft[p.id] ||= {}).open = t;
   persist(); render();
 };
+// ---- запис директно в GitHub (Contents API) ----
+const REPO = "DilyanNIliev/apteki", FILE = "data/overrides.json", BRANCH = "main";
+const API = "https://api.github.com/repos/" + REPO + "/contents/" + FILE;
+const getToken = () => { try { return localStorage.getItem("ghtoken") || ""; } catch (e) { return ""; } };
+const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
+$("tokenSave").onclick = () => {
+  const t = $("token").value.trim();
+  if (!t) return;
+  try { localStorage.setItem("ghtoken", t); } catch (e) {}
+  $("token").value = ""; $("tokenBox").open = false; $("status").textContent = "Токенът е запомнен в този браузър.";
+};
+$("tokenForget").onclick = () => { try { localStorage.removeItem("ghtoken"); } catch (e) {} $("status").textContent = "Токенът е изтрит."; };
+$("save").onclick = async () => {
+  const token = getToken();
+  if (!token) { $("tokenBox").open = true; $("status").textContent = "Първо въведи GitHub токен (виж „Настройка за запис“)."; return; }
+  if (!changedCount()) { $("status").textContent = "Няма промени за запазване."; return; }
+  const h = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" };
+  $("save").disabled = true; $("status").textContent = "Записвам…";
+  try {
+    // взимаме най-новата версия, за да не затрием чужди промени
+    const cur = await fetch(API + "?ref=" + BRANCH, { headers: h });
+    let sha;
+    if (cur.ok) { const j = await cur.json(); sha = j.sha; try { saved = JSON.parse(unb64(j.content)); } catch (e) {} delete saved["_пояснение"]; }
+    else if (cur.status !== 404) throw new Error(cur.status === 401 || cur.status === 403 ? "Токенът е невалиден или няма право за запис." : "GitHub върна " + cur.status);
+    const res = await fetch(API, { method:"PUT", headers: { ...h, "Content-Type":"application/json" },
+      body: JSON.stringify({ message: "Update pharmacy data from admin page", content: b64(cleaned()), sha, branch: BRANCH }) });
+    if (!res.ok) throw new Error(res.status === 401 || res.status === 403 || res.status === 404 ? "Няма право за запис (провери токена и достъпа до хранилището)." : "GitHub върна " + res.status);
+    saved = JSON.parse(cleaned()); draft = {}; persist(); render();
+    $("status").textContent = "Запазено ✓ Сайтът се обновява след 1–3 минути.";
+  } catch (e) { $("status").textContent = "Грешка: " + e.message; }
+  $("save").disabled = false;
+};
+
 $("dl").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([cleaned()], { type:"application/json" }));

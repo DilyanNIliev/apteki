@@ -56,6 +56,10 @@ for (const p of list) {
 ${theme}
 </head>
 <body>
+<div class="layout">
+<aside class="ad">Място за реклама</aside>
+<div class="content">
+<nav class="nav"><a class="on" href="../">Аптеки</a><a href="../pochivni-dni.html">Почивни дни</a></nav>
 <header>
   <div class="top"><a href="../">← Всички аптеки</a><button id="theme" type="button" aria-label="Смяна на режима"></button></div>
   <h1>${esc(p.name)}</h1>
@@ -72,6 +76,9 @@ ${theme}
   </section>
   <iframe class="map" title="Карта" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${esc(embedUrl(p))}"></iframe>
 </main>
+</div>
+<aside class="ad">Място за реклама</aside>
+</div>
 <script src="../common.js"></script>
 <script>
 const p = ${JSON.stringify({ open:p.open, close:p.close, h24:p.h24, closedTemp:p.closedTemp }).replace(/</g, "\\u003c")};

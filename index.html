@@ -8,6 +8,10 @@
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
+<div class="layout">
+<aside class="ad">Място за реклама</aside>
+<div class="content">
+<nav class="nav"><a class="on" href="./">Аптеки</a><a href="pochivni-dni.html">Почивни дни</a></nav>
 <header>
   <div class="top">
     <h1>Аптеки във Варна</h1>
@@ -27,9 +31,12 @@
     <label><input type="checkbox" id="fHoliday"> Работят на празници</label>
   </div>
   <p id="status" role="status"></p>
-  <div class="grid" id="list"></div>
+  <div class="grid full" id="list"></div>
   <p class="note">Часът на затваряне е по данни от Google Maps към деня на проверката. „Работят сега“ показва само аптеки с известни час на отваряне и затваряне. Обади се преди посещение.</p>
 </main>
+</div>
+<aside class="ad">Място за реклама</aside>
+</div>
 <script src="common.js"></script>
 <script>
 let pharmacies = [], user = null;
@@ -100,13 +107,13 @@ function render() {
     const open = isOpen(p, now);
     const page = "apteka/" + p.slug + ".html";
     return `<article class="card">
-      <h2><a href="${esc(page)}">${esc(p.name)}</a></h2>
+      <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2><div class="links"><a href="${esc(page)}">Подробности и карта →</a></div></div>
       <div>${open === true ? '<span class="badge">Отворено</span>' : open === false ? '<span class="badge closed">Затворено</span>' : ""}
         ${p.h24 ? '<span class="badge alt">24ч</span>' : ""}${p.compound ? '<span class="badge alt">Приготвя лекарства</span>' : ""}${p.holiday ? '<span class="badge alt">Работи на празници</span>' : ""}</div>
-      <div class="row"><b>Адрес:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
+      <div class="facts"><div class="row"><b>Адрес:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
       <div class="row"><b>Работно време:</b> ${esc(hoursText(p))}</div>
       <div class="row"><b>Телефон:</b> ${p.phone ? `<a href="tel:${esc(p.phone.replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</div>
-      <div class="links"><a href="${esc(page)}">Подробности и карта</a></div>
+      </div>
     </article>`;
   }).join("") : "<p>Няма резултати.</p>";
   if (!user) statusEl.textContent = items.length + " от " + pharmacies.length + " аптеки.";
