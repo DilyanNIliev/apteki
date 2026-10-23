@@ -35,7 +35,7 @@
     </div>
     <div class="bulk">
       <span>Общ час на отваряне за всички без такъв:</span>
-      <input type="time" id="bulkOpen">
+      <input type="time" id="bulkOpen" step="900">
       <button type="button" id="bulkApply">Приложи</button>
       <span style="flex:1"></span>
       <button type="button" class="primary" id="save">💾 Запази в сайта</button>
@@ -105,7 +105,7 @@ function render() {
       <div class="row">${esc(val(p, "address"))}</div>
       <div class="edit">
         ${FIELDS.map(k => `<label class="${["note","gmaps","website","address","name"].includes(k) ? "wide" : ""}">${LABEL[k]}
-          <input type="${k === "open" || k === "close" ? "time" : "text"}" data-k="${k}" value="${esc(val(p, k))}"></label>`).join("")}
+          <input type="${k === "open" || k === "close" ? "time" : "text"}" ${k === "open" || k === "close" ? 'step="900"' : ""} data-k="${k}" value="${esc(val(p, k))}"></label>`).join("")}
         ${BOOLS.map(k => `<label class="chk"><input type="checkbox" data-k="${k}" ${val(p, k) || (k === "holiday" && p.h24) ? "checked" : ""}> ${LABEL[k]}</label>`).join("")}
       </div>
     </article>`).join("");
