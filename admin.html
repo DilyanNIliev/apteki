@@ -14,6 +14,7 @@
   .edit .wide { grid-column:1 / -1; }
   .edit .chk { display:flex; flex-direction:row; align-items:center; gap:6px; color:var(--text); font-size:.9rem; }
   .card.changed { border-color:var(--accent); }
+  .tokenCard { margin-bottom:12px; } .tokenCard summary { cursor:pointer; }
   .bar { position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 0; border-bottom:1px solid var(--line); }
   .bulk { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   textarea.json { width:100%; height:160px; font:12px/1.4 monospace; background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; }
@@ -26,6 +27,15 @@
   <p class="sub">Попълваш полетата, промените се пазят в този браузър. Накрая натискаш „Свали overrides.json“ (или „Копирай“) и ми го пращаш – аз го качвам и сайтът се обновява.</p>
 </header>
 <main>
+  <details id="tokenBox" class="card tokenCard">
+    <summary><b>🔑 Настройка за запис в GitHub</b> <span class="muted" id="tokenState"></span></summary>
+    <p class="note">В GitHub: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: само <b>apteki</b>; Permissions → Repository permissions → <b>Contents: Read and write</b>. Поставяш токена тук – пази се само в този браузър и се праща само към api.github.com.</p>
+    <div class="bulk">
+      <input type="password" id="token" placeholder="github_pat_…" autocomplete="off" style="flex:1;min-width:220px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">
+      <button type="button" id="tokenSave">Запомни токена</button>
+      <button type="button" id="tokenForget">Забрави</button>
+    </div>
+  </details>
   <div class="bar">
     <div class="controls">
       <input type="search" id="q" placeholder="Търси по име, адрес, телефон или №…">
@@ -46,15 +56,6 @@
     </div>
     <p id="status" role="status"></p>
   </div>
-  <details id="tokenBox">
-    <summary>Настройка за запис в GitHub (еднократно)</summary>
-    <p class="note">В GitHub: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token. Repository access: само <b>apteki</b>; Permissions → Repository permissions → <b>Contents: Read and write</b>. Поставяш токена тук – пази се само в този браузър и се праща само към api.github.com.</p>
-    <div class="bulk">
-      <input type="password" id="token" placeholder="github_pat_…" autocomplete="off" style="flex:1;min-width:220px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">
-      <button type="button" id="tokenSave">Запомни токена</button>
-      <button type="button" id="tokenForget">Забрави</button>
-    </div>
-  </details>
   <div id="importBox" hidden>
     <p class="note">Постави JSON от overrides.json и натисни „Зареди“.</p>
     <textarea class="json" id="importText"></textarea>
@@ -136,13 +137,15 @@ const API = "https://api.github.com/repos/" + REPO + "/contents/" + FILE;
 const getToken = () => { try { return localStorage.getItem("ghtoken") || ""; } catch (e) { return ""; } };
 const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
+function tokenUi() { $("tokenState").textContent = getToken() ? "· токенът е запазен ✓" : "· още не е въведен токен"; $("tokenBox").open = !getToken(); }
 $("tokenSave").onclick = () => {
   const t = $("token").value.trim();
   if (!t) return;
   try { localStorage.setItem("ghtoken", t); } catch (e) {}
-  $("token").value = ""; $("tokenBox").open = false; $("status").textContent = "Токенът е запомнен в този браузър.";
+  $("token").value = ""; tokenUi(); $("status").textContent = "Токенът е запомнен в този браузър.";
 };
-$("tokenForget").onclick = () => { try { localStorage.removeItem("ghtoken"); } catch (e) {} $("status").textContent = "Токенът е изтрит."; };
+$("tokenForget").onclick = () => { try { localStorage.removeItem("ghtoken"); } catch (e) {} tokenUi(); $("status").textContent = "Токенът е изтрит."; };
+tokenUi();
 $("save").onclick = async () => {
   const token = getToken();
   if (!token) { $("tokenBox").open = true; $("status").textContent = "Първо въведи GitHub токен (виж „Настройка за запис“)."; return; }
