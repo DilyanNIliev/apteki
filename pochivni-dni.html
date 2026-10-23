@@ -12,15 +12,27 @@
 <div class="layout">
 <aside class="ad">Място за реклама</aside>
 <div class="content">
-<nav class="nav"><a href="./">Аптеки</a><a class="on" href="pochivni-dni.html">Почивни дни</a></nav>
+<nav class="nav"><a href="./">Аптеки</a><a class="on" href="pochivni-dni.html">Почивни дни</a><button id="theme" type="button" aria-label="Смяна на режима"></button></nav>
 <header>
-  <div class="top"><h1>Почивни дни <span id="yearTitle"></span></h1><button id="theme" type="button" aria-label="Смяна на режима"></button></div>
+  <div class="top"><h1>Почивни дни <span id="yearTitle"></span></h1></div>
   <p class="sub">Официални празници и неработни дни в България. На празничните дни повечето аптеки работят по празнично работно време – виж страницата на аптеката или се обади.</p>
   <div class="years" id="years" role="tablist" aria-label="Година"></div>
 </header>
 <main>
   <section class="card"><div class="hol-list" id="list"></div></section>
   <div class="legend"><span><i style="background:var(--warn)"></i>Официален празник</span><span><i style="background:var(--accent)"></i>Компенсиран почивен ден</span><span><i style="outline:2px solid var(--text)"></i>Днес</span></div>
+  <section class="card tips">
+    <h2>Как да комбинираш отпуска и да почиваш по-дълго</h2>
+    <p class="muted">Идеята е да „залепиш“ платен отпуск към празници и уикенди, така че с малко дни отпуска да получиш повече поредни почивни дни. Ето най-изгодните комбинации за <b class="yr"></b> г.:</p>
+    <div class="trips" id="trips"></div>
+    <ul class="tipsList">
+      <li>Първо провери кои празници падат в понеделник, петък или в средата на седмицата – там една-две дни отпуска дават най-много.</li>
+      <li>Великденските празници (петък–понеделник) са добра основа: 3–4 дни отпуска около тях дават над 9 поредни дни.</li>
+      <li>Празник в събота или неделя се компенсира с първия работен ден след него – вземи следващите дни отпуска, за да удължиш почивката.</li>
+      <li>Към Коледа и Нова година често с 3–5 дни отпуска се получава почивка от над 10 дни.</li>
+      <li>Заяви отпуската рано – най-изгодните дати се търсят от всички.</li>
+    </ul>
+  </section>
   <div class="months" id="months"></div>
   <p class="note" id="notes"></p>
 </main>
@@ -75,7 +87,7 @@ try { const y = +new URLSearchParams(location.search).get("year"); if (YEARS.inc
 function render() {
   $("yearTitle").textContent = year;
   document.title = "Почивни дни " + year + " – България";
-  $("years").innerHTML = YEARS.map(y => `<button type="button" class="${y === year ? "on" : ""}" data-y="${y}">${y}${y === thisYear ? " (тази)" : y < thisYear ? " (мина)" : " (следваща)"}</button>`).join("");
+  $("years").innerHTML = YEARS.map(y => `<button type="button" class="${y === year ? "on" : ""}" data-y="${y}">${y}</button>`).join("");
   const hs = holidays(year), map = Object.fromEntries(hs.map(h => [h.iso, h]));
   $("list").innerHTML = hs.map(h => `<div class="hol ${h.iso < todayIso ? "past" : ""}">
       <div class="d">${h.date.getDate()} ${MON[h.date.getMonth()]}, ${DOW[h.date.getDay()]}</div>
@@ -90,8 +102,42 @@ function render() {
     }
     return `<div class="card month"><h3>${name}</h3><div class="cal">${cells}</div></div>`;
   }).join("");
+  renderTrips(hs);
   const n = hs.length;
   $("notes").textContent = "Общо " + n + " неработни дни в списъка за " + year + " г. Ако празник (без Великденските) се падне в събота или неделя, почива се на следващия работен ден. Официалният списък се определя от Кодекса на труда и решенията на Министерския съвет – при съмнение провери в Държавен вестник.";
+}
+const DAY = 864e5;
+function renderTrips(hs) {
+  document.querySelector(".tips .yr").textContent = year;
+  const off = new Set([...holidays(year - 1), ...hs, ...holidays(year + 1)].map(h => h.iso));   // само празници, без уикендите
+  const isOff = d => [0,6].includes(d.getDay()) || off.has(iso(d));
+  const start = mk(year, 1, 1), last = mk(year, 12, 31), cands = [];
+  for (let s = new Date(start); s <= last; s = addDays(s, 1)) {
+    if (!isOff(s) || isOff(addDays(s, -1))) continue;           // започваме от началото на почивна серия
+    for (let e = addDays(s, 3), leave = 0; e <= addDays(s, 24); e = addDays(e, 1)) {
+      leave = 0; const used = [];
+      for (let d = addDays(s, 1); d < e; d = addDays(d, 1)) if (!isOff(d)) { leave++; used.push(new Date(d)); }
+      if (leave < 1 || leave > 5 || !isOff(e) || isOff(addDays(e, 1))) continue;   // завършваме в края на серия
+      const len = Math.round((e - s) / DAY) + 1;
+      let hasHoliday = false;
+      for (let d = s; d <= e; d = addDays(d, 1)) if (off.has(iso(d))) { hasHoliday = true; break; }
+      if (len >= 5 && hasHoliday) cands.push({ s, e, leave, used, len, ratio:len / leave });
+    }
+  }
+  cands.sort((a, b) => b.ratio - a.ratio || b.len - a.len);
+  const picked = [];
+  for (const c of cands) {
+    if (picked.length >= 8) break;
+    if (picked.some(p => c.s <= addDays(p.e, 1) && c.e >= addDays(p.s, -1))) continue;
+    picked.push(c);
+  }
+  picked.sort((a, b) => a.s - b.s);
+  const f = d => d.getDate() + " " + MON[d.getMonth()].toLowerCase();
+  $("trips").innerHTML = picked.length ? picked.map(c => `<div class="trip ${iso(c.e) < todayIso ? "past" : ""}">
+      <div class="big">${c.len} дни почивка</div>
+      <div><b>${f(c.s)} – ${f(c.e)}</b></div>
+      <div class="muted">Вземи ${c.leave} ${c.leave === 1 ? "ден" : "дни"} отпуска: ${c.used.map(f).join(", ")}</div>
+    </div>`).join("") : "<p class='muted'>Няма подходящи комбинации.</p>";
 }
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
