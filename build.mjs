@@ -122,12 +122,12 @@ ${theme}
     ${p.note ? `<div class="row"><b>Бележка</b><span>${esc(p.note)}</span></div>` : ""}
     <div class="links"><a class="btn" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">Упътвания в Google Maps</a>${p.phone ? `<a class="btn" href="tel:${esc(tel)}">Обади се</a>` : ""}</div>
   </section>
+  <iframe class="map" title="Карта" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${esc(embedUrl(p))}"></iframe>
   <section class="card fix">
     <h2>Собственик на аптеката ли сте? Данните грешни ли са?</h2>
     <p class="muted">Ако работното време, телефонът или адресът не са верни, или искате да ги промените, изпратете корекция – ще я прегледаме и ще обновим страницата.</p>
-    <a class="btn" href="../korekciya.html?id=${p.id}">Предложи корекция</a>
+    <div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🗺️ Отвори в Google Maps</a><a class="btn fix" href="../korekciya.html?id=${p.id}">✏️ Предложи корекция</a></div>
   </section>
-  <iframe class="map" title="Карта" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${esc(embedUrl(p))}"></iframe>
 </main>
 </div>
 <aside class="ad">Място за реклама</aside>
@@ -177,7 +177,7 @@ function kvFaq(k) {
   if (late) out.push({ q:`Коя аптека в ${name} работи най-късно вечерта?`, a:`Най-късно затваря ${late.p.name} (${late.p.address}) – в ${late.c} ч. в делничен ден.` });
   return out;
 }
-const rowHtml = (p, pre = "../") => `<tr><td><a href="${pre}apteka/${p.slug}.html">${esc(p.name)}</a>${p.h24 ? ' <span class="badge">24ч</span>' : ""}${p.closedTemp ? ' <span class="badge closed">затворена</span>' : ""}</td><td>${esc(p.address)}</td><td>${p.phone ? `<a href="tel:${esc(p.phone.split("/")[0].replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</td><td>${esc(HL.summary(p))}</td><td><a href="${esc(dirUrl(p))}" target="_blank" rel="noopener">Карта</a> · <a href="${pre}korekciya.html?id=${p.id}">Корекция</a></td></tr>`;
+const rowHtml = (p, pre = "../") => `<tr><td><a href="${pre}apteka/${p.slug}.html">${esc(p.name)}</a>${p.h24 ? ' <span class="badge">24ч</span>' : ""}${p.closedTemp ? ' <span class="badge closed">затворена</span>' : ""}</td><td>${esc(p.address)}</td><td>${p.phone ? `<a href="tel:${esc(p.phone.split("/")[0].replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</td><td>${esc(HL.summary(p))}</td><td><div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">🗺️ Карта</a><a class="btn sm fix" href="${pre}korekciya.html?id=${p.id}">✏️ Корекция</a></div></td></tr>`;
 for (const k of kvartali) {
   const { name, ps } = k, faq = kvFaq(k), title = `Аптеки в ${name}, Варна – адреси, телефони и работно време`;
   const desc = `Аптеки в ${name}, Варна: ${pl(ps.length, "аптека", "аптеки")} с адрес, телефон и работно време по дни. ${ps.some(p => p.h24) ? "Включва денонощна аптека." : ""}`;
