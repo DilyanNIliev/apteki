@@ -1,0 +1,110 @@
+// Съдържание (<header> + <main>) на страниците на аптеки и квартали на избран език.
+// Ползва се от build.mjs (готов HTML за търсачките) и от браузъра (превод на страниците на аптеките).
+// Зависи от i18n.js и hours.js. env = { root, kvInfo } – root е относителният път от страницата до корена на сайта.
+(function (root) {
+  const tl = (l, k, v) => root.I18N.t(l, k, v);
+  const Q = (l, n) => root.I18N.quarter(l, n);
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  const dir = l => (l === "bg" ? "" : l + "/");
+  const HL = () => root.HoursLib;
+
+  const TRANS = { а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sht",ъ:"a",ь:"",ю:"yu",я:"ya" };
+  const slugify = s => s.toLowerCase().split("").map(c => TRANS[c] ?? c).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  const q = p => encodeURIComponent(`${p.name}, ${p.address}, Варна`);
+  const dirUrl = p => p.gmaps || `https://www.google.com/maps/dir/?api=1&destination=${q(p)}`;
+  const embedUrl = p => p.lat != null ? `https://maps.google.com/maps?q=${p.lat},${p.lon}&z=17&output=embed` : `https://maps.google.com/maps?q=${q(p)}&z=16&output=embed`;
+  const fixUrl = (p, l, r) => `${r}korekciya.html?id=${p.id}${l === "bg" ? "" : "&lang=" + l}`;
+  const telOf = s => s.split("/")[0].replace(/[^\d+]/g, "");
+
+  // „1 аптека / 2 аптеки“ – ru и uk имат три форми
+  const pluralIdx = (l, n) => (l === "ru" || l === "uk")
+    ? ((n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14)) ? 1 : 2)
+    : (n === 1 ? 0 : 1);
+  const pl = (l, n) => n + " " + tl(l, "kv.i.pharm")[pluralIdx(l, n)];
+
+  function hoursHtml(p, l) {
+    if (p.closedTemp) return esc(tl(l, "closedTemp"));
+    if (p.h24) return esc(tl(l, "h.24long"));
+    const H = HL();
+    if (!H.ORDER.some(d => p.days[d] !== undefined)) return p.close ? `${esc(tl(l, "h.closesAt", { c: p.close }))} <span class="muted">${esc(tl(l, "h.hint"))}</span>` : '<span class="muted">—</span>';
+    return `<table class="hours">${H.ORDER.map(d => `<tr><td>${esc(H.long(l, d))}</td><td>${p.days[d] === undefined ? '<span class="muted">—</span>' : p.days[d] === null ? esc(tl(l, "h.offDay")) : p.days[d][0] + "–" + p.days[d][1]}</td></tr>`).join("")}</table>`;
+  }
+
+  // кварталите със собствена страница (поне kvMin аптеки)
+  function buildKvartali(list, kvMin = 3) {
+    const by = new Map();
+    for (const p of list) if (p.kvartal) (by.get(p.kvartal) || by.set(p.kvartal, []).get(p.kvartal)).push(p);
+    return [...by.entries()].filter(([, ps]) => ps.length >= kvMin)
+      .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], "bg"))
+      .map(([name, ps]) => ({ name, slug: slugify(name), ps }));
+  }
+  const worksOn = (ps, d) => ps.filter(p => p.h24 || (p.days[d] && p.days[d] !== null));
+  function kvIntro(k, l, kvInfo) {
+    const { name, ps } = k, h24 = ps.filter(p => p.h24), sun = worksOn(ps, 0), sat = worksOn(ps, 6);
+    const info = (kvInfo || {})[name] || {};
+    const custom = info["intro_" + l] || (l === "bg" ? info.intro : "") || "";   // собствено въведение от data/kvartali.json
+    return [
+      custom,
+      tl(l, "kv.i.count", { q: Q(l, name), n: pl(l, ps.length), h24: h24.length ? tl(l, "kv.i.with24", { n: h24.length }) : tl(l, "kv.i.no24") }),
+      ps.some(p => p.h24 || p.days[0] !== undefined) ? tl(l, "kv.i.sun", { list: sun.length ? sun.map(p => p.name).join(", ") : tl(l, "kv.i.none") }) : "",
+      sat.length && ps.some(p => p.days[6] !== undefined) ? tl(l, "kv.i.sat", { n: sat.length }) : ""
+    ].filter(Boolean).join(" ");
+  }
+  function kvFaq(k, l) {
+    const { name, ps } = k, qn = Q(l, name), h24 = ps.filter(p => p.h24), out = [];
+    out.push({ q: tl(l, "kv.q.24", { q: qn }), a: h24.length ? tl(l, "kv.a.24yes", { list: h24.map(p => `${p.name} (${p.address}${p.phone ? ", " + (l === "bg" ? "тел. " : "") + p.phone : ""})`).join("; ") }) : tl(l, "kv.a.24no", { q: qn }) });
+    const sun = worksOn(ps, 0);
+    if (ps.some(p => p.h24 || p.days[0] !== undefined)) out.push({ q: tl(l, "kv.q.sun", { q: qn }), a: sun.length ? tl(l, "kv.a.sunYes", { list: sun.map(p => `${p.name} (${p.address}, ${HL().summary(p, l)})`).join("; ") }) : tl(l, "kv.a.sunNo", { q: qn }) });
+    const late = ps.filter(p => !p.h24).map(p => ({ p, c: ((p.days[1] || [])[1]) || p.close })).filter(x => x.c).sort((a, b) => b.c.localeCompare(a.c))[0];
+    if (late) out.push({ q: tl(l, "kv.q.late", { q: qn }), a: tl(l, "kv.a.late", { name: late.p.name, addr: late.p.address, c: late.c }) });
+    return out;
+  }
+
+  function pharmacyHtml(p, l, env) {
+    const r = env.root, ix = r + dir(l), tel = telOf(p.phone || "");
+    return `<header>
+  <div class="top"><a href="${ix}">${esc(tl(l, "back.all"))}</a>${p.kvartalPage ? `<a href="${ix}kvartal/${p.kvartalSlug}.html">${esc(tl(l, "in.quarter", { q: Q(l, p.kvartal) }))}</a>` : ""}</div>
+  <h1>${esc(p.name)}</h1>
+  <div id="badges">${p.h24 ? `<span class="badge">${esc(tl(l, "yes24"))}</span>` : ""}${p.closedTemp ? `<span class="badge closed">${esc(tl(l, "closedTemp"))}</span>` : ""}${p.compound ? `<span class="badge alt">${esc(tl(l, "badge.compound"))}</span>` : ""}${p.holiday ? `<span class="badge alt">${esc(tl(l, "badge.holiday"))}</span>` : ""}<span id="state"></span></div>
+</header>
+<main>
+  <section class="card info">
+    <div class="row"><b>${esc(tl(l, "lbl.address"))}</b><span>${esc(p.address)}, ${esc(tl(l, "city"))}</span></div>
+    ${p.kvartal ? `<div class="row"><b>${esc(tl(l, "lbl.quarter"))}</b><span>${p.kvartalPage ? `<a href="${ix}kvartal/${p.kvartalSlug}.html">${esc(Q(l, p.kvartal))}</a>` : esc(Q(l, p.kvartal))}</span></div>` : ""}
+    <div class="row"><b>${esc(tl(l, "lbl.phone"))}</b><span>${p.phone ? `<a href="tel:${esc(tel)}">${esc(p.phone)}</a>` : '<span class="muted">—</span>'}</span></div>
+    <div class="row"><b>${esc(tl(l, "lbl.hours"))}</b><span>${hoursHtml(p, l)}</span></div>
+    <div class="row"><b>${esc(tl(l, "lbl.website"))}</b><span>${p.website ? `<a href="${esc(p.website)}" target="_blank" rel="noopener">${esc(p.website)}</a>` : p.hasSite ? `<span class="muted">${esc(tl(l, "site.missing"))}</span>` : '<span class="muted">—</span>'}</span></div>
+    ${p.note ? `<div class="row"><b>${esc(tl(l, "lbl.note"))}</b><span>${esc(p.note)}</span></div>` : ""}
+    <div class="links"><a class="btn" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">${esc(tl(l, "btn.directions"))}</a>${p.phone ? `<a class="btn" href="tel:${esc(tel)}">${esc(tl(l, "btn.call"))}</a>` : ""}</div>
+  </section>
+  <iframe class="map" title="${esc(tl(l, "map.title"))}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${esc(embedUrl(p))}"></iframe>
+  <section class="card fix">
+    <h2>${esc(tl(l, "fix.h"))}</h2>
+    <p class="muted">${esc(tl(l, "fix.p"))}</p>
+    <div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">${esc(tl(l, "btn.gmaps"))}</a><a class="btn fix" href="${esc(fixUrl(p, l, r))}">${esc(tl(l, "btn.fix"))}</a></div>
+  </section>
+</main>`;
+  }
+
+  function kvartalHtml(k, kvartali, l, env) {
+    const { name, ps } = k, qn = Q(l, name), r = env.root, ix = r + dir(l), faq = kvFaq(k, l), th = tl(l, "kv.th");
+    const sorted = ps.slice().sort((a, b) => (b.h24 - a.h24) || a.name.localeCompare(b.name, "bg"));
+    const others = kvartali.filter(x => x.slug !== k.slug);
+    const row = p => `<tr><td><a href="${r}apteka/${p.slug}.html">${esc(p.name)}</a>${p.h24 ? ` <span class="badge">${esc(tl(l, "yes24"))}</span>` : ""}${p.closedTemp ? ` <span class="badge closed">${esc(tl(l, "badge.closed"))}</span>` : ""}</td><td>${esc(p.address)}</td><td>${p.phone ? `<a href="tel:${esc(telOf(p.phone))}">${esc(p.phone)}</a>` : "—"}</td><td>${esc(HL().summary(p, l))}</td><td><div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">${esc(tl(l, "btn.map"))}</a><a class="btn sm fix" href="${esc(fixUrl(p, l, r))}">${esc(tl(l, "btn.fixShort"))}</a></div></td></tr>`;
+    return `<header>
+  <p class="note"><a href="${ix}">${esc(tl(l, "index.title"))}</a> › ${esc(qn)}</p>
+  <h1>${esc(tl(l, "kv.h1", { q: qn }))}</h1>
+  <p class="sub">${esc(kvIntro(k, l, env.kvInfo))}</p>
+</header>
+<main>
+  <section class="card"><div class="tablewrap"><table class="list"><thead><tr>${th.map(x => `<th>${esc(x)}</th>`).join("")}<th></th></tr></thead><tbody>${sorted.map(row).join("")}</tbody></table></div>
+  <div class="links"><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tl(l, "kv.mapQuery", { q: qn }))}" target="_blank" rel="noopener">${esc(tl(l, "kv.allMap"))}</a></div></section>
+  ${faq.length ? `<section class="card seo"><h2>${esc(tl(l, "kv.faqH", { q: qn }))}</h2>${faq.map(f => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}</section>` : ""}
+  ${others.length ? `<section class="card seo"><h2>${esc(tl(l, "kv.otherH"))}</h2><p>${others.map(x => `<a href="${ix}kvartal/${x.slug}.html">${esc(Q(l, x.name))}</a> (${x.ps.length})`).join(" · ")}</p></section>` : ""}
+</main>`;
+  }
+
+  root.Render = { esc, slugify, pl, dirUrl, embedUrl, hoursHtml, buildKvartali, kvIntro, kvFaq, pharmacyHtml, kvartalHtml };
+  if (typeof module !== "undefined") module.exports = root.Render;
+})(typeof window !== "undefined" ? window : globalThis);
