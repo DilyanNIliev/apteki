@@ -141,10 +141,10 @@ $("copy").onclick = async () => {
 };
 $("f").addEventListener("submit", e => {
   e.preventDefault();
-  const bad = spamProblem();
-  if (bad) { alert(bad); return; }
   const t = build();
   if (t.split("\n").length <= 2) { alert("Попълни поне едно поле, което искаш да се промени."); return; }
+  const bad = spamProblem();
+  if (bad) { alert(bad); return; }
   $("out").value = t; $("result").style.display = "block";
   const url = cfg.contactEmail
     ? `mailto:${cfg.contactEmail}?subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(t)}`
