@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Редакция на аптеките</title>
 <link rel="stylesheet" href="style.css">
-<script>(function(){try{var p=localStorage.getItem("theme")||"auto",d=document.documentElement;d.dataset.pref=p;if(p==="auto"){var h=+new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Sofia",hour:"2-digit",hour12:false}).format(new Date())%24;p=(h>=20||h<7)?"dark":"light"}d.dataset.theme=p}catch(e){}})();</script>
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
   .edit { display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); margin-top:8px; }
   .edit label { display:block; font-size:.8rem; color:var(--muted); }
