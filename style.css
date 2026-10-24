@@ -107,7 +107,8 @@ button.primary { border-radius:999px; padding:10px 18px; font-weight:600; }
 .tipsList { color:var(--muted); padding-left:20px; margin:8px 0 0; }
 .cal .leave { background:var(--leave); color:#1c1c1c; font-weight:700; }
 .tipsList li.past { opacity:.5; }
-.cal .sch { box-shadow:inset 0 -3px 0 var(--school); }
+.cal .sch { background:var(--school); color:#fff; font-weight:700; }
+.cal .ph.sch, .cal .off.sch, .cal .leave.sch { box-shadow:inset 0 -4px 0 var(--school); }
 .badge.sch { background:var(--school); }
 .seo { margin-top:24px; }
 .seo h2 { font-size:1.1rem; } .seo h3 { font-size:1rem; margin:16px 0 4px; color:var(--accent); }
@@ -138,3 +139,31 @@ table.list .actions { margin:0; padding:0; border:0; flex-wrap:nowrap; }
 .links { gap:12px 16px; }
 .btn, .actions a { margin:2px 0; }
 table.list .actions { gap:10px; }
+
+/* --- превключвател на езика --- */
+.nav #lang { margin-left:auto; position:relative; }
+.langsw summary { list-style:none; cursor:pointer; border:1px solid var(--line); background:var(--card); border-radius:999px; padding:4px 12px; font-size:.9rem; font-weight:600; white-space:nowrap; user-select:none; }
+.langsw summary::-webkit-details-marker { display:none; }
+.langsw .menu { position:absolute; right:0; top:calc(100% + 6px); z-index:30; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:6px; display:grid; gap:2px; min-width:190px; }
+.langsw .menu button { display:flex; gap:8px; align-items:center; text-align:left; border:0; background:transparent; border-radius:8px; padding:8px 10px; width:100%; }
+.langsw .menu button:hover, .langsw .menu button.on { background:color-mix(in srgb, var(--accent) 14%, transparent); }
+.langsw .menu small { color:var(--muted); margin-left:auto; }
+.fl { font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; }
+.cal .ph.sch { background:var(--warn); color:#fff; }
+.cal .off.sch { background:var(--accent); color:#fff; }
+.cal .leave.sch { background:var(--leave); color:#1c1c1c; }
+
+/* --- сгъваеми блокове (въпроси, именни дни) --- */
+details.acc { border:1px solid var(--line); border-radius:12px; background:var(--card); padding:0 14px; margin:8px 0; }
+details.acc > summary { cursor:pointer; padding:12px 0; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+details.acc > summary::-webkit-details-marker { display:none; }
+details.acc > summary::after { content:"+"; color:var(--accent); font-size:1.3rem; line-height:1; }
+details.acc[open] > summary::after { content:"–"; }
+details.acc[open] > summary { border-bottom:1px solid var(--line); margin-bottom:8px; }
+details.acc p { margin:8px 0 12px; }
+.card > details.acc { margin:0; }
+ul.nd { list-style:none; padding:0; margin:0 0 8px; display:grid; gap:6px; }
+ul.nd li.past { opacity:.55; }
+.tips h3 { color:var(--accent); font-size:1rem; margin:14px 0 6px; }
+@media (min-width:760px) { .hol-list.cols { grid-template-columns:1fr 1fr; column-gap:28px; } }
+.legend { margin-bottom:4px; }

@@ -11,44 +11,45 @@
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Аптеки във Варна – работно време, телефони и карта"><meta name="twitter:description" content="Всички аптеки във Варна: 142 адреса с телефон, работно време и карта. Денонощни аптеки, отворени сега и най-близка до теб."><!--/META-->
 <!--LD--><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Аптеки във Варна","url":"https://dilyanniliev.github.io/apteki/","inLanguage":"bg"},{"@type":"ItemList","name":"Аптеки във Варна по квартали","numberOfItems":4,"itemListElement":[{"@type":"ListItem","position":1,"url":"https://dilyanniliev.github.io/apteki/kvartal/tsentar.html","name":"Аптеки в Център"},{"@type":"ListItem","position":2,"url":"https://dilyanniliev.github.io/apteki/kvartal/vladislavovo.html","name":"Аптеки в Владиславово"},{"@type":"ListItem","position":3,"url":"https://dilyanniliev.github.io/apteki/kvartal/asparuhovo.html","name":"Аптеки в Аспарухово"},{"@type":"ListItem","position":4,"url":"https://dilyanniliev.github.io/apteki/kvartal/chayka.html","name":"Аптеки в Чайка"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Кои са денонощните аптеки във Варна?","acceptedAnswer":{"@type":"Answer","text":"Денонощни аптеки във Варна: Денонощна аптека Живита (бул. Владислав Варненчик 65, тел. 052 607 033); Валя Дечева (бул. Цар Освободител 77А, тел. 052 612 008); Санита (ул. Генерал Колев 72, тел. 052 602 560); Ани Фарма – денонощна аптека (ул. Мир 8, тел. 089 966 6692); Денонощна аптека (ул. Цар Иван Асен II 42, тел. 087 688 0400)."}},{"@type":"Question","name":"Колко аптеки има в списъка?","acceptedAnswer":{"@type":"Answer","text":"В сайта са събрани 142 аптеки във Варна с адрес, телефон, работно време и карта."}},{"@type":"Question","name":"Как да намеря най-близката аптека?","acceptedAnswer":{"@type":"Answer","text":"Натиснете бутона „Най-близка до мен“ и разрешете достъп до местоположението – аптеките се подреждат по разстояние."}}]}]}</script><!--/LD-->
 <link rel="stylesheet" href="style.css">
-<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>(function(){try{var p=localStorage.getItem("theme")||"auto",d=document.documentElement;d.dataset.pref=p;if(p==="auto"){var h=+new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Sofia",hour:"2-digit",hour12:false}).format(new Date())%24;p=(h>=20||h<7)?"dark":"light"}d.dataset.theme=p}catch(e){}})();</script>
 </head>
 <body>
 <div class="layout">
-<aside class="ad">Място за реклама</aside>
+<aside class="ad" data-i18n="ad">Място за реклама</aside>
 <div class="content">
-<nav class="nav"><a class="on" href="./">Аптеки</a><a href="pochivni-dni.html">Почивни дни</a><button id="theme" type="button" aria-label="Смяна на режима"></button></nav>
+<nav class="nav"><a class="on" href="./" data-i18n="nav.pharm">Аптеки</a><a href="pochivni-dni.html" data-i18n="nav.hol" id="navHol">Почивни дни</a><button id="theme" type="button"></button><div id="lang"></div></nav>
 <header>
   <div class="top">
-    <h1>Аптеки във Варна</h1>
+    <h1 data-i18n="index.title">Аптеки във Варна</h1>
   </div>
-  <p class="sub">Телефон, адрес, работно време и карта за всяка аптека.</p>
+  <p class="sub" data-i18n="index.sub">Телефон, адрес, работно време и карта за всяка аптека.</p>
 </header>
 <main>
   <div class="controls">
-    <input type="search" id="q" placeholder="Търси по име, адрес или телефон…" aria-label="Търсене">
-    <button id="locate" class="primary" type="button">📍 Най-близка до мен</button>
+    <input type="search" id="q" data-i18n-ph="search.ph" data-i18n-aria="search.aria" placeholder="Търси по име, адрес или телефон…">
+    <button id="locate" class="primary" type="button" data-i18n="locate">📍 Най-близка до мен</button>
   </div>
   <div class="controls">
-    <label><input type="checkbox" id="fOpen"> Работят сега</label>
-    <label><input type="checkbox" id="f24"> Денонощни</label>
-    <label><input type="checkbox" id="fCompound"> Приготвят лекарства</label>
-    <label><input type="checkbox" id="fHoliday"> Работят на празници</label>
-    <label>Квартал: <select id="kv"><option value="">Всички</option></select></label>
+    <label><input type="checkbox" id="fOpen"> <span data-i18n="f.open">Работят сега</span></label>
+    <label><input type="checkbox" id="f24"> <span data-i18n="f.24">Денонощни</span></label>
+    <label><input type="checkbox" id="fCompound"> <span data-i18n="f.compound">Приготвят лекарства</span></label>
+    <label><input type="checkbox" id="fHoliday"> <span data-i18n="f.holiday">Работят на празници</span></label>
+    <label><span data-i18n="f.quarter">Квартал:</span> <select id="kv"><option value="" data-i18n="f.all">Всички</option></select></label>
   </div>
   <p id="status" role="status"></p>
   <div class="grid full" id="list"></div>
-  <p class="note">Часът на затваряне е по данни от Google Maps към деня на проверката. „Работят сега“ показва само аптеки с известни час на отваряне и затваряне. Обади се преди посещение.</p>
+  <p class="note" data-i18n="note.index">Часът на затваряне е по данни от Google Maps към деня на проверката. Обади се преди посещение.</p>
 <!--SEOLIST-->
 <section class="card seo" id="all-links">
-  <h2>Аптеки във Варна по квартали</h2>
-  <p class="muted">Каталог на 142 аптеки във Варна с адрес, телефон и работно време по дни. Денонощни аптеки: Денонощна аптека Живита, бул. Владислав Варненчик 65; Валя Дечева, бул. Цар Освободител 77А; Санита, ул. Генерал Колев 72; Ани Фарма – денонощна аптека, ул. Мир 8; Денонощна аптека, ул. Цар Иван Асен II 42.</p>
-  <p><a href="kvartal/tsentar.html">Център</a> (9) · <a href="kvartal/vladislavovo.html">Владиславово</a> (8) · <a href="kvartal/asparuhovo.html">Аспарухово</a> (6) · <a href="kvartal/chayka.html">Чайка</a> (4)</p>
+  <h2 data-i18n="seo.h">Аптеки във Варна по квартали</h2>
+  <p class="muted"><span data-i18n="seo.intro" data-vars='{"n":142}'>Каталог на 142 аптеки във Варна с адрес, телефон и работно време по дни.</span> <span data-i18n="seo.h24">Денонощни аптеки:</span> Денонощна аптека Живита, бул. Владислав Варненчик 65; Валя Дечева, бул. Цар Освободител 77А; Санита, ул. Генерал Колев 72; Ани Фарма – денонощна аптека, ул. Мир 8; Денонощна аптека, ул. Цар Иван Асен II 42.</p>
+  <p><a data-href="kvartal/tsentar.html" data-q="Център" data-count="9" href="kvartal/tsentar.html">Център (9)</a> · <a data-href="kvartal/vladislavovo.html" data-q="Владиславово" data-count="8" href="kvartal/vladislavovo.html">Владиславово (8)</a> · <a data-href="kvartal/asparuhovo.html" data-q="Аспарухово" data-count="6" href="kvartal/asparuhovo.html">Аспарухово (6)</a> · <a data-href="kvartal/chayka.html" data-q="Чайка" data-count="4" href="kvartal/chayka.html">Чайка (4)</a></p>
 </section><!--/SEOLIST-->
 </main>
 </div>
-<aside class="ad">Място за реклама</aside>
+<aside class="ad" data-i18n="ad">Място за реклама</aside>
 </div>
+<script src="i18n.js"></script>
 <script src="hours.js"></script>
 <script src="common.js"></script>
 <script>
@@ -56,8 +57,10 @@ let pharmacies = [], user = null;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const statusEl = $("status");
+let geoMsg = null;                       // последно съобщение за местоположението (за превод при смяна на езика)
+const setGeo = (k, v) => { geoMsg = { k, v }; statusEl.textContent = tt(k, v); };
 
-const hoursText = p => HoursLib.summary(p);
+const hoursText = p => HoursLib.summary(p, LANG);
 
 // ---- местоположение: адресите се геокодират в браузъра (Nominatim) и се кешират ----
 const coords = {};
@@ -84,8 +87,8 @@ function km(a, b) {
   return 2*R*Math.asin(Math.sqrt(h));
 }
 $("locate").onclick = () => {
-  if (!navigator.geolocation) { statusEl.textContent = "Браузърът не поддържа определяне на местоположение."; return; }
-  statusEl.textContent = "Чакам разрешение за местоположение…";
+  if (!navigator.geolocation) { setGeo("status.nogeo"); return; }
+  setGeo("status.wait");
   navigator.geolocation.getCurrentPosition(async pos => {
     user = [pos.coords.latitude, pos.coords.longitude];
     let done = 0;
@@ -94,11 +97,11 @@ $("locate").onclick = () => {
     for (const p of order) {
       const c = await geocode(p);
       if (c) p.dist = km(user, c);
-      if (++done % 5 === 0 || done === order.length) { statusEl.textContent = "Определям разстоянията… " + done + "/" + order.length; render(); }
+      if (++done % 5 === 0 || done === order.length) { setGeo("status.progress", { done, total: order.length }); render(); }
     }
-    statusEl.textContent = "Подредено по разстояние до теб (по права линия). Аптеки без разпознат адрес са най-отзад.";
+    setGeo("status.sorted");
     render();
-  }, err => { statusEl.textContent = err.code === 1 ? "Няма разрешение за местоположение." : "Местоположението не може да бъде определено."; });
+  }, err => { setGeo(err.code === 1 ? "status.denied" : "status.geofail"); });
 };
 
 // ---- списък ----
@@ -114,30 +117,46 @@ function render() {
   if (user) items = items.slice().sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
   $("list").innerHTML = items.length ? items.map(p => {
     const open = isOpen(p, now);
-    const page = "apteka/" + p.slug + ".html";
+    const page = langPrefix() + "apteka/" + p.slug + ".html";
     return `<article class="card">
       <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2></div>
-      <div>${open === true ? '<span class="badge">Отворено</span>' : open === false ? '<span class="badge closed">Затворено</span>' : ""}
-        ${p.h24 ? '<span class="badge alt">24ч</span>' : ""}${p.compound ? '<span class="badge alt">Приготвя лекарства</span>' : ""}${p.holiday ? '<span class="badge alt">Работи на празници</span>' : ""}</div>
-      <div class="facts"><div class="row"><b>Адрес:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
-      <div class="row"><b>Работно време:</b> ${esc(hoursText(p))}</div>
-      <div class="row"><b>Телефон:</b> ${p.phone ? `<a href="tel:${esc(p.phone.replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</div>
+      <div>${open === true ? `<span class="badge">${tt("badge.open")}</span>` : open === false ? `<span class="badge closed">${tt("badge.closed")}</span>` : ""}
+        ${p.h24 ? `<span class="badge alt">${tt("yes24")}</span>` : ""}${p.compound ? `<span class="badge alt">${tt("badge.compound")}</span>` : ""}${p.holiday ? `<span class="badge alt">${tt("badge.holiday")}</span>` : ""}</div>
+      <div class="facts"><div class="row"><b>${tt("lbl.address")}:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} ${tt("km")}` : ""}</div>
+      <div class="row"><b>${tt("lbl.hours")}:</b> ${esc(hoursText(p))}</div>
+      <div class="row"><b>${tt("lbl.phone")}:</b> ${p.phone ? `<a href="tel:${esc(p.phone.replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</div>
       </div>
       <div class="actions">
-        <a class="btn sm" href="${esc(page)}">ℹ️ Повече информация</a>
-        <a class="btn sm ghost" href="${esc(p.gmaps || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.name + ", " + p.address + ", Варна"))}" target="_blank" rel="noopener">🗺️ Карта</a>
-        <a class="btn sm fix" href="korekciya.html?id=${p.id}">✏️ Предложи корекция</a>
+        <a class="btn sm" href="${esc(page)}">${tt("btn.more")}</a>
+        <a class="btn sm ghost" href="${esc(p.gmaps || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.name + ", " + p.address + ", Варна"))}" target="_blank" rel="noopener">${tt("btn.map")}</a>
+        <a class="btn sm fix" href="${withLang("korekciya.html?id=" + p.id)}">${tt("btn.fix")}</a>
       </div>
     </article>`;
-  }).join("") : "<p>Няма резултати.</p>";
-  if (!user) statusEl.textContent = items.length + " от " + pharmacies.length + " аптеки.";
+  }).join("") : `<p>${tt("none.results")}</p>`;
+  if (!geoMsg) statusEl.textContent = tt("status.count", { n: items.length, total: pharmacies.length });
 }
 ["q","fOpen","f24","fCompound","fHoliday","kv"].forEach(id => $(id).addEventListener("input", render));
-fetch("data.json").then(r => r.json()).then(d => { pharmacies = d;
-    const ks = [...new Set(d.map(p => p.kvartal).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bg"));
-    $("kv").innerHTML += ks.map(k => `<option>${esc(k)}</option>`).join("");
-    render(); setInterval(render, 60000); })
-  .catch(() => { statusEl.textContent = "Списъкът не може да се зареди."; });
+function fillQuarters() {
+  const cur = $("kv").value;
+  const ks = [...new Set(pharmacies.map(p => p.kvartal).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bg"));
+  $("kv").innerHTML = `<option value="">${tt("f.all")}</option>` + ks.map(k => `<option value="${esc(k)}">${esc(I18N.quarter(LANG, k))}</option>`).join("");
+  $("kv").value = cur;
+}
+function fixStaticLinks() {                  // връзки към генерираните страници – с езика на посетителя
+  document.querySelectorAll("a[data-href]").forEach(a => { a.href = langPrefix() + a.dataset.href; });
+  document.querySelectorAll("a[data-q]").forEach(a => { a.textContent = I18N.quarter(LANG, a.dataset.q) + " (" + a.dataset.count + ")"; });
+  const h = $("navHol"); if (h) h.href = "pochivni-dni.html";
+}
+function onLangChange() {
+  document.title = tt("index.docTitle");
+  if (pharmacies.length) fillQuarters();
+  geoMsg ? (statusEl.textContent = tt(geoMsg.k, geoMsg.v)) : null;
+  fixStaticLinks(); render();
+}
+document.title = tt("index.docTitle");
+fixStaticLinks();
+fetch("data.json").then(r => r.json()).then(d => { pharmacies = d; fillQuarters(); render(); setInterval(render, 60000); })
+  .catch(() => { setGeo("status.loaderr"); });
 </script>
 </body>
 </html>

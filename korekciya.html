@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, follow">
 <title>Предложи корекция – Аптеки във Варна</title>
 <link rel="stylesheet" href="style.css">
-<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>(function(){try{var p=localStorage.getItem("theme")||"auto",d=document.documentElement;d.dataset.pref=p;if(p==="auto"){var h=+new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Sofia",hour:"2-digit",hour12:false}).format(new Date())%24;p=(h>=20||h<7)?"dark":"light"}d.dataset.theme=p}catch(e){}})();</script>
 <style>
   form { display:grid; gap:14px; }
   fieldset { border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin:0; }
@@ -22,65 +22,67 @@
 </head>
 <body>
 <div class="layout">
-<aside class="ad">Място за реклама</aside>
+<aside class="ad" data-i18n="ad">Място за реклама</aside>
 <div class="content">
-<nav class="nav"><a href="./">Аптеки</a><a href="pochivni-dni.html">Почивни дни</a><button id="theme" type="button" aria-label="Смяна на режима"></button></nav>
+<nav class="nav"><a href="./" data-i18n="nav.pharm">Аптеки</a><a href="pochivni-dni.html" data-i18n="nav.hol">Почивни дни</a><button id="theme" type="button"></button><div id="lang"></div></nav>
 <header>
-  <p class="note"><a href="./">Аптеки във Варна</a> › Предложи корекция</p>
-  <h1>Предложи корекция</h1>
-  <p class="sub" id="who">Зареждам аптеката…</p>
+  <p class="note"><a href="./" data-i18n="index.title">Аптеки във Варна</a> › <span data-i18n="fx.crumb">Предложи корекция</span></p>
+  <h1 data-i18n="fx.title">Предложи корекция</h1>
+  <p class="sub" id="who" data-i18n="fx.loading">Зареждам аптеката…</p>
 </header>
 <main>
   <section class="card">
-    <p class="muted">Ако си собственик или служител на аптеката и данните са грешни, или просто си забелязал грешка – попълни само това, което искаш да се промени. Преглеждаме предложенията ръчно и обновяваме страницата.</p>
+    <p class="muted" data-i18n="fx.intro"></p>
     <form id="f" autocomplete="off">
-      <fieldset><legend>Кой си ти?</legend>
+      <fieldset><legend data-i18n="fx.who">Кой си ти?</legend>
         <div class="opts">
-          <label><input type="radio" name="role" value="собственик / управител" checked> Собственик / управител</label>
-          <label><input type="radio" name="role" value="служител"> Служител</label>
-          <label><input type="radio" name="role" value="клиент"> Клиент</label>
+          <label><input type="radio" name="role" value="собственик / управител" checked> <span data-i18n="fx.owner"></span></label>
+          <label><input type="radio" name="role" value="служител"> <span data-i18n="fx.staff"></span></label>
+          <label><input type="radio" name="role" value="клиент"> <span data-i18n="fx.client"></span></label>
         </div>
       </fieldset>
-      <fieldset><legend>Работно време по дни (ако е грешно)</legend>
+      <fieldset><legend data-i18n="fx.hoursH"></legend>
         <div id="hours"></div>
-        <label class="chk"><input type="checkbox" id="h24"> Аптеката е денонощна</label>
+        <label class="chk"><input type="checkbox" id="h24"> <span data-i18n="fx.is24"></span></label>
       </fieldset>
-      <fieldset><legend>Други данни</legend>
-        <label>Телефон<input type="text" id="phone" placeholder="напр. 052 123 456"></label>
-        <label>Адрес<input type="text" id="address"></label>
-        <label>Уебсайт<input type="text" id="website" placeholder="https://…"></label>
+      <fieldset><legend data-i18n="fx.otherH"></legend>
+        <label><span data-i18n="fx.phone"></span><input type="text" id="phone" placeholder="052 123 456"></label>
+        <label><span data-i18n="fx.address"></span><input type="text" id="address"></label>
+        <label><span data-i18n="fx.website"></span><input type="text" id="website" placeholder="https://…"></label>
         <div class="opts" style="margin-top:6px">
-          <label><input type="checkbox" id="closed"> Аптеката е закрита завинаги</label>
-          <label><input type="checkbox" id="moved"> Преместена е на друг адрес</label>
+          <label><input type="checkbox" id="closed"> <span data-i18n="fx.closedFor"></span></label>
+          <label><input type="checkbox" id="moved"> <span data-i18n="fx.moved"></span></label>
         </div>
       </fieldset>
-      <label>Допълнителна информация<textarea id="note" placeholder="Какво е правилното? Например: на 24 декември работим до 14:00."></textarea></label>
-      <fieldset><legend>Контакт (по желание – за да се свържем при нужда)</legend>
-        <label>Име<input type="text" id="cname"></label>
-        <label>Телефон или имейл<input type="text" id="cinfo"></label>
-        <p class="note">Контактите се използват само за проверка на корекцията и не се публикуват.</p>
+      <label><span data-i18n="fx.note"></span><textarea id="note" data-i18n-ph="fx.notePh"></textarea></label>
+      <fieldset><legend data-i18n="fx.contactH"></legend>
+        <label><span data-i18n="fx.cname"></span><input type="text" id="cname"></label>
+        <label><span data-i18n="fx.cinfo"></span><input type="text" id="cinfo"></label>
+        <p class="note" data-i18n="fx.contactNote"></p>
       </fieldset>
-      <label class="hp" aria-hidden="true">Не попълвай това поле<input type="text" id="website2" tabindex="-1" autocomplete="off"></label>
-      <label>Проверка, че си човек: <span id="q"></span> = ? <input type="text" id="ans" inputmode="numeric" autocomplete="off" style="max-width:120px"></label>
+      <label class="hp" aria-hidden="true">x<input type="text" id="website2" tabindex="-1" autocomplete="off"></label>
+      <label><span><span data-i18n="fx.human"></span> <span id="q"></span> = ?</span> <input type="text" id="ans" inputmode="numeric" autocomplete="off" style="max-width:120px"></label>
       <div class="links">
-        <button type="submit" class="primary" id="send">Изпрати корекцията</button>
-        <button type="button" id="copy">Копирай текста</button>
+        <button type="submit" class="primary" id="send" data-i18n="fx.send"></button>
+        <button type="button" id="copy" data-i18n="fx.copy"></button>
       </div>
       <p class="note" id="how"></p>
     </form>
   </section>
-  <section class="card" id="result"><h2>Текст на корекцията</h2><p class="muted">Ако пощата не се отвори, копирай този текст и го изпрати на посочения адрес.</p><textarea id="out" readonly></textarea></section>
+  <section class="card" id="result"><h2 data-i18n="fx.resultH"></h2><p class="muted" data-i18n="fx.resultP"></p><textarea id="out" readonly></textarea></section>
 </main>
 </div>
-<aside class="ad">Място за реклама</aside>
+<aside class="ad" data-i18n="ad">Място за реклама</aside>
 </div>
+<script src="i18n.js"></script>
+<script src="hours.js"></script>
 <script src="common.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const TIMES = Array.from({ length: 96 }, (_, i) => String(Math.floor(i / 4)).padStart(2, "0") + ":" + String((i % 4) * 15).padStart(2, "0"));
 const sel = id => `<select id="${id}"><option value="">—</option>${TIMES.map(t => `<option>${t}</option>`).join("")}</select>`;
-const ROWS = [["Пн–Пт","wd"],["Събота","sa"],["Неделя","su"]];
-$("hours").innerHTML = ROWS.map(([l, k]) => `<div class="hrow"><b>${l}</b>${sel(k + "O")}<span>–</span>${sel(k + "C")}${k === "wd" ? "" : `<label class="chk" style="display:flex;flex-direction:row;gap:4px;align-items:center"><input type="checkbox" id="${k}Off"> почивен</label>`}</div>`).join("");
+const ROWS = [["fx.d.wd","wd","Пн–Пт"],["fx.d.sa","sa","Събота"],["fx.d.su","su","Неделя"]];   // третият елемент е името за получателя (винаги на български)
+$("hours").innerHTML = ROWS.map(([l, k]) => `<div class="hrow"><b data-i18n="${l}"></b>${sel(k + "O")}<span>–</span>${sel(k + "C")}${k === "wd" ? "" : `<label class="chk" style="display:flex;flex-direction:row;gap:4px;align-items:center"><input type="checkbox" id="${k}Off"> <span data-i18n="fx.offday"></span></label>`}</div>`).join("");
 
 let cfg = { contactEmail: "", repo: "DilyanNIliev/apteki" }, ph = null;
 const id = new URLSearchParams(location.search).get("id") || "";
@@ -90,9 +92,14 @@ Promise.all([
 ]).then(([d, c]) => {
   cfg = { ...cfg, ...c };
   ph = d.find(p => p.id === id) || null;
-  $("who").textContent = ph ? `Аптека №${ph.id}: ${ph.name} – ${ph.address}, Варна` : "Не е избрана аптека – посочи я в допълнителната информация.";
-  $("how").textContent = cfg.contactEmail ? "Корекцията се изпраща по имейл (ще се отвори пощата ти)." : "Корекцията се изпраща като публично съобщение в GitHub – не пиши лични данни. (Собственикът на сайта може да зададе имейл.)";
+  paintInfo();
 });
+function paintInfo() {
+  $("who").textContent = ph ? `№${ph.id}: ${ph.name} – ${ph.address}, ${tt("city")}` : tt("fx.nopharm");
+  $("how").textContent = tt(cfg.contactEmail ? "fx.howMail" : "fx.howGh");
+}
+function onLangChange() { document.title = tt("fx.title") + " – " + tt("index.title"); if (ph || cfg) paintInfo(); }
+document.title = tt("fx.title") + " – " + tt("index.title");
 
 // --- защита от спам ---
 // Формата не публикува нищо сама: изпращането минава през пощата или GitHub профила на подателя, така че ботове не могат да пишат директно.
@@ -101,16 +108,16 @@ const born = Date.now(), A = 2 + Math.floor(Math.random() * 8), B = 2 + Math.flo
 $("q").textContent = A + " + " + B;
 const LIMIT_MS = 60000, LIMIT_DAY = 5;
 function spamProblem() {
-  if ($("website2").value) return "Невалидно изпращане.";
-  if (Date.now() - born < 4000) return "Изчакай няколко секунди и опитай пак.";
-  if (+$("ans").value.trim() !== A + B) return "Отговорът на проверката не е верен.";
+  if ($("website2").value) return tt("fx.err.bot");
+  if (Date.now() - born < 4000) return tt("fx.err.fast");
+  if (+$("ans").value.trim() !== A + B) return tt("fx.err.answer");
   const text = [...document.querySelectorAll("input[type=text],textarea")].filter(e => e.id !== "website2" && e.id !== "out").map(e => e.value).join(" ");
-  if (text.length > 2000) return "Текстът е твърде дълъг.";
-  if ((text.match(/https?:\/\//gi) || []).length > 2) return "Твърде много линкове.";
+  if (text.length > 2000) return tt("fx.err.long");
+  if ((text.match(/https?:\/\//gi) || []).length > 2) return tt("fx.err.links");
   try {
     const log = JSON.parse(localStorage.getItem("fixLog") || "[]").filter(t => Date.now() - t < 864e5);
-    if (log.length && Date.now() - log[log.length - 1] < LIMIT_MS) return "Моля, изчакай минута преди следващото изпращане.";
-    if (log.length >= LIMIT_DAY) return "Достигнат е дневният лимит за изпращане.";
+    if (log.length && Date.now() - log[log.length - 1] < LIMIT_MS) return tt("fx.err.minute");
+    if (log.length >= LIMIT_DAY) return tt("fx.err.day");
     localStorage.setItem("fixLog", JSON.stringify([...log, Date.now()]));
   } catch (e) {}
   return "";
@@ -121,7 +128,7 @@ function build() {
   L.push(`Подава: ${document.querySelector('input[name=role]:checked').value}`);
   if ($("h24").checked) L.push("Работно време: денонощна");
   else {
-    const h = ROWS.map(([l, k]) => {
+    const h = ROWS.map(([, k, l]) => {
       if (k !== "wd" && $(k + "Off").checked) return `${l}: почивен`;
       return $(k + "O").value && $(k + "C").value ? `${l}: ${$(k + "O").value}–${$(k + "C").value}` : "";
     }).filter(Boolean);
@@ -142,7 +149,7 @@ $("copy").onclick = async () => {
 $("f").addEventListener("submit", e => {
   e.preventDefault();
   const t = build();
-  if (t.split("\n").length <= 2) { alert("Попълни поне едно поле, което искаш да се промени."); return; }
+  if (t.split("\n").length <= 2) { alert(tt("fx.err.empty")); return; }
   const bad = spamProblem();
   if (bad) { alert(bad); return; }
   $("out").value = t; $("result").style.display = "block";
