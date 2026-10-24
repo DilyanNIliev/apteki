@@ -10,17 +10,31 @@ const isOpen = (p, now) => HoursLib.isOpen(p, now);
 
 // ---- език ----
 const ROOT_EL = document.documentElement;
+// Страници с езикови версии (индексируеми): data-page = път от корена ("" за началната), data-lang = езикът на тази версия.
+// Останалите страници (аптеки, корекция) се превеждат в браузъра по запомнения език.
+const SITE_ROOT = ROOT_EL.dataset.root || "";             // относителен път до корена на сайта
+const PAGE_PATH = ROOT_EL.dataset.page;                   // undefined = страница без езикови версии
+const dirOfLang = l => (l === "bg" ? "" : l + "/");
 let LANG = "bg";
 (function initLang() {
   const ok = l => I18N.LANGS.includes(l);
-  let l = new URLSearchParams(location.search).get("lang");
-  if (!ok(l)) { try { l = localStorage.getItem("lang"); } catch (e) { l = null; } }
-  LANG = ok(l) ? l : "bg";
+  let stored = null; try { stored = localStorage.getItem("lang"); } catch (e) {}
+  if (PAGE_PATH !== undefined) {
+    const pageLang = ok(ROOT_EL.dataset.lang) ? ROOT_EL.dataset.lang : "bg";
+    // български адрес, а посетителят е избрал друг език – пренасочваме автоматично към неговата версия
+    if (pageLang === "bg" && ok(stored) && stored !== "bg") { location.replace(SITE_ROOT + dirOfLang(stored) + PAGE_PATH + location.search + location.hash); return; }
+    LANG = pageLang;
+  } else {
+    let l = new URLSearchParams(location.search).get("lang");
+    if (!ok(l)) l = stored;
+    LANG = ok(l) ? l : "bg";
+  }
   try { localStorage.setItem("lang", LANG); } catch (e) {}
   ROOT_EL.lang = LANG;
 })();
 const tt = (key, vars) => I18N.t(LANG, key, vars);
 const nameL = bg => I18N.name(LANG, bg);                 // имена на празници / събития
+const idxHref = (path, l) => SITE_ROOT + dirOfLang(l || LANG) + path;      // връзка към индексируема страница на текущия език
 const withLang = url => LANG === "bg" ? url : url + (url.includes("?") ? "&" : "?") + "lang=" + LANG;   // за връзки към динамичните страници
 
 function applyI18n(scope) {
@@ -28,16 +42,21 @@ function applyI18n(scope) {
   q("[data-i18n]").forEach(e => { e.textContent = tt(e.dataset.i18n, e.dataset.vars ? JSON.parse(e.dataset.vars) : undefined); });
   q("[data-i18n-ph]").forEach(e => { e.placeholder = tt(e.dataset.i18nPh); });
   q("[data-i18n-aria]").forEach(e => { e.setAttribute("aria-label", tt(e.dataset.i18nAria)); });
-  q("[data-bgonly]").forEach(e => { e.hidden = LANG !== "bg"; });
-  paintTheme(); paintLang();
+  paintTheme(); paintLang(); fixNav();
 }
 function setLang(l) {
   if (!I18N.LANGS.includes(l) || l === LANG) return;
   try { localStorage.setItem("lang", l); } catch (e) {}
+  if (PAGE_PATH !== undefined) { location.href = SITE_ROOT + dirOfLang(l) + PAGE_PATH; return; }   // отиваме на езиковата версия на страницата
   LANG = l; ROOT_EL.lang = l;
   try { const u = new URL(location.href); u.searchParams.delete("lang"); history.replaceState(null, "", u); } catch (e) {}
   applyI18n();
   if (typeof onLangChange === "function") onLangChange();
+}
+function fixNav() {                       // връзките към индексируемите страници водят към версията на текущия език
+  const h = document.getElementById("navHome"), p = document.getElementById("navHol");
+  if (h) h.href = idxHref(""); if (p) p.href = idxHref("pochivni-dni.html");
+  document.querySelectorAll("a[data-idx]").forEach(a => { a.href = idxHref(a.dataset.idx); });
 }
 
 // ---- тема: Авто (по часа в София: нощем 20:00–07:00 е тъмна) → Дневен → Нощен ----

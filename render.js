@@ -50,21 +50,21 @@
     if (late) out.push({ q: tl(l, "kv.q.late", { q: q2 }), a: tl(l, "kv.a.late", { name: late.p.name, addr: late.p.address, c: late.c }) });
     return out;
   }
-  const rowHtml = (p, l, rootPath) => `<tr><td><a href="../apteka/${p.slug}.html">${esc(p.name)}</a>${p.h24 ? ` <span class="badge">${esc(tl(l, "yes24"))}</span>` : ""}${p.closedTemp ? ` <span class="badge closed">${esc(tl(l, "badge.closed"))}</span>` : ""}</td><td>${esc(p.address)}</td><td>${p.phone ? `<a href="tel:${esc(p.phone.split("/")[0].replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</td><td>${esc(HL().summary(p, l))}</td><td><div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">${esc(tl(l, "btn.map"))}</a><a class="btn sm fix" href="${rootPath}korekciya.html?id=${p.id}${l === "bg" ? "" : "&lang=" + l}">${esc(tl(l, "btn.fixShort"))}</a></div></td></tr>`;
+  const rowHtml = (p, l, rootPath) => `<tr><td><a href="${rootPath}apteka/${p.slug}.html">${esc(p.name)}</a>${p.h24 ? ` <span class="badge">${esc(tl(l, "yes24"))}</span>` : ""}${p.closedTemp ? ` <span class="badge closed">${esc(tl(l, "badge.closed"))}</span>` : ""}</td><td>${esc(p.address)}</td><td>${p.phone ? `<a href="tel:${esc(p.phone.split("/")[0].replace(/[^\d+]/g, ""))}">${esc(p.phone)}</a>` : "—"}</td><td>${esc(HL().summary(p, l))}</td><td><div class="actions"><a class="btn sm ghost" href="${esc(dirUrl(p))}" target="_blank" rel="noopener">${esc(tl(l, "btn.map"))}</a><a class="btn sm fix" href="${rootPath}korekciya.html?id=${p.id}${l === "bg" ? "" : "&lang=" + l}">${esc(tl(l, "btn.fixShort"))}</a></div></td></tr>`;
 
   // <header> + <main> на страницата на аптека. env = { root: "../" }
   function pharmacyHtml(p, l, env) {
-    const tel = p.phone.replace(/[^\d+]/g, ""), r = env.root, qs = l === "bg" ? "" : "?lang=" + l;
+    const tel = p.phone.replace(/[^\d+]/g, ""), r = env.root, ix = r + (l === "bg" ? "" : l + "/");
     const fixHref = `${r}korekciya.html?id=${p.id}${l === "bg" ? "" : "&lang=" + l}`;
     return `<header>
-  <div class="top"><a href="${r}${qs}">${esc(tl(l, "back.all"))}</a>${p.kvartalPage ? `<a href="../kvartal/${p.kvartalSlug}.html">${esc(tl(l, "in.quarter", { q: I().quarter(l, p.kvartal) }))}</a>` : ""}</div>
+  <div class="top"><a href="${ix}">${esc(tl(l, "back.all"))}</a>${p.kvartalPage ? `<a href="${ix}kvartal/${p.kvartalSlug}.html">${esc(tl(l, "in.quarter", { q: I().quarter(l, p.kvartal) }))}</a>` : ""}</div>
   <h1>${esc(p.name)}</h1>
   <div id="badges">${p.h24 ? `<span class="badge">${esc(tl(l, "yes24"))}</span>` : ""}${p.closedTemp ? `<span class="badge closed">${esc(tl(l, "closedTemp"))}</span>` : ""}${p.compound ? `<span class="badge alt">${esc(tl(l, "badge.compound"))}</span>` : ""}${p.holiday ? `<span class="badge alt">${esc(tl(l, "badge.holiday"))}</span>` : ""}<span id="state"></span></div>
 </header>
 <main>
   <section class="card info">
     <div class="row"><b>${esc(tl(l, "lbl.address"))}</b><span>${esc(p.address)}, ${esc(tl(l, "city"))}</span></div>
-    ${p.kvartal ? `<div class="row"><b>${esc(tl(l, "lbl.quarter"))}</b><span>${p.kvartalPage ? `<a href="../kvartal/${p.kvartalSlug}.html">${esc(I().quarter(l, p.kvartal))}</a>` : esc(I().quarter(l, p.kvartal))}</span></div>` : ""}
+    ${p.kvartal ? `<div class="row"><b>${esc(tl(l, "lbl.quarter"))}</b><span>${p.kvartalPage ? `<a href="${ix}kvartal/${p.kvartalSlug}.html">${esc(I().quarter(l, p.kvartal))}</a>` : esc(I().quarter(l, p.kvartal))}</span></div>` : ""}
     <div class="row"><b>${esc(tl(l, "lbl.phone"))}</b><span>${p.phone ? `<a href="tel:${esc(tel)}">${esc(p.phone)}</a>` : '<span class="muted">—</span>'}</span></div>
     <div class="row"><b>${esc(tl(l, "lbl.hours"))}</b><span>${hoursHtml(p, l)}</span></div>
     <div class="row"><b>${esc(tl(l, "lbl.website"))}</b><span>${p.website ? `<a href="${esc(p.website)}" target="_blank" rel="noopener">${esc(p.website)}</a>` : p.hasSite ? `<span class="muted">${esc(tl(l, "site.missing"))}</span>` : '<span class="muted">—</span>'}</span></div>
@@ -81,11 +81,11 @@
   }
   // <header> + <main> на страницата на квартал
   function kvartalHtml(k, kvartali, l, env) {
-    const { name, ps } = k, q2 = I().quarter(l, name), r = env.root, qs = l === "bg" ? "" : "?lang=" + l;
+    const { name, ps } = k, q2 = I().quarter(l, name), r = env.root, ix = r + (l === "bg" ? "" : l + "/");
     const faq = kvFaq(k, l), th = tl(l, "kv.th"), others = kvartali.filter(x => x.slug !== k.slug);
     const sorted = ps.slice().sort((a, b) => (b.h24 - a.h24) || a.name.localeCompare(b.name, "bg"));
     return `<header>
-  <p class="note"><a href="${r}${qs}">${esc(tl(l, "index.title"))}</a> › ${esc(q2)}</p>
+  <p class="note"><a href="${ix}">${esc(tl(l, "index.title"))}</a> › ${esc(q2)}</p>
   <h1>${esc(tl(l, "kv.h1", { q: q2 }))}</h1>
   <p class="sub">${esc(kvIntro(k, l, env.kvInfo))}</p>
 </header>
@@ -93,7 +93,7 @@
   <section class="card"><div class="tablewrap"><table class="list"><thead><tr>${th.map(x => `<th>${esc(x)}</th>`).join("")}<th></th></tr></thead><tbody>${sorted.map(p => rowHtml(p, l, r)).join("")}</tbody></table></div>
   <div class="links"><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tl(l, "kv.mapQuery", { q: q2 }))}" target="_blank" rel="noopener">${esc(tl(l, "kv.allMap"))}</a></div></section>
   ${faq.length ? `<section class="card seo"><h2>${esc(tl(l, "kv.faqH", { q: q2 }))}</h2>${faq.map(f => `<details class="acc"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("")}</section>` : ""}
-  ${others.length ? `<section class="card seo"><h2>${esc(tl(l, "kv.otherH"))}</h2><p>${others.map(x => `<a href="${x.slug}.html">${esc(I().quarter(l, x.name))}</a> (${x.ps.length})`).join(" · ")}</p></section>` : ""}
+  ${others.length ? `<section class="card seo"><h2>${esc(tl(l, "kv.otherH"))}</h2><p>${others.map(x => `<a href="${ix}kvartal/${x.slug}.html">${esc(I().quarter(l, x.name))}</a> (${x.ps.length})`).join(" · ")}</p></section>` : ""}
 </main>`;
   }
   root.Render = { esc, slugify, pl, dirUrl, embedUrl, hoursHtml, buildKvartali, kvIntro, kvFaq, pharmacyHtml, kvartalHtml };

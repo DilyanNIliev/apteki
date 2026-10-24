@@ -77,127 +77,165 @@ function pharmacyLd(p) {
   return { "@context":"https://schema.org", "@graph":[o, crumbs] };
 }
 const theme = `<script>(function(){try{var p=localStorage.getItem("theme")||"auto",d=document.documentElement;d.dataset.pref=p;if(p==="auto"){var h=+new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Sofia",hour:"2-digit",hour12:false}).format(new Date())%24;p=(h>=20||h<7)?"dark":"light"}d.dataset.theme=p}catch(e){}})();</script>`;
-const navHtml = `<nav class="nav"><a class="on" href="../" data-i18n="nav.pharm">Аптеки</a><a href="../pochivni-dni.html" data-i18n="nav.hol">Почивни дни</a><button id="theme" type="button"></button><div id="lang"></div></nav>`;
-const scripts = `<script src="../i18n.js"></script>\n<script src="../hours.js"></script>\n<script src="../render.js"></script>\n<script src="../common.js"></script>\n<script src="../static.js"></script>`;
-const shell = (attrs, head, inner) => `<!doctype html>
-<html lang="bg" data-theme="auto" ${attrs}>
+// езици: bg е в корена, останалите в /en/, /ru/, /uk/ (само индексируемите страници – начална, почивни дни, квартали)
+const LANGS = I.LANGS, dirOf = l => (l === "bg" ? "" : l + "/"), rootOf = l => (l === "bg" ? "../" : "../../");   // rootOf: от kvartal/ до корена
+const urlOf = (l, path) => BASE + dirOf(l) + path;
+const OGL = { bg: "bg_BG", en: "en_GB", ru: "ru_RU", uk: "uk_UA" };
+const hreflangs = path => LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${esc(urlOf(l, path))}">`).join("") + `<link rel="alternate" hreflang="x-default" href="${esc(urlOf("bg", path))}">`;
+const navHtml = (l, root) => `<nav class="nav"><a class="on" href="${root}${dirOf(l)}" id="navHome">${esc(tl(l, "nav.pharm"))}</a><a href="${root}${dirOf(l)}pochivni-dni.html" id="navHol">${esc(tl(l, "nav.hol"))}</a><button id="theme" type="button"></button><div id="lang"></div></nav>`;
+const scriptsHtml = (root, extra) => `<script src="${root}i18n.js"></script>\n<script src="${root}hours.js"></script>\n<script src="${root}render.js"></script>\n<script src="${root}common.js"></script>${extra ? `\n<script src="${root}${extra}"></script>` : ""}`;
+const shell = (l, root, attrs, head, inner, extraScript) => `<!doctype html>
+<html lang="${l}" data-theme="auto" data-root="${root}" ${attrs}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${head}
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="${root}style.css">
 ${theme}
 </head>
 <body>
 <div class="layout">
-<aside class="ad" data-i18n="ad">Място за реклама</aside>
+<aside class="ad">${esc(tl(l, "ad"))}</aside>
 <div class="content">
-${navHtml}
+${navHtml(l, root)}
 <div id="app">${inner}</div>
 </div>
-<aside class="ad" data-i18n="ad">Място за реклама</aside>
+<aside class="ad">${esc(tl(l, "ad"))}</aside>
 </div>
-${scripts}
+${scriptsHtml(root, extraScript)}
 </body>
 </html>
 `;
-const ogMeta = (url, title, desc) => `<link rel="canonical" href="${esc(url)}">
-<meta property="og:type" content="website"><meta property="og:locale" content="bg_BG"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">
+const ogMeta = (l, url, title, desc, hreflangPath) => `<link rel="canonical" href="${esc(url)}">
+${hreflangPath !== undefined ? hreflangs(hreflangPath) + "\n" : ""}<meta property="og:type" content="website"><meta property="og:locale" content="${OGL[l]}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">
 <meta name="twitter:card" content="summary">`;
 
-for (const d of ["apteka", "kvartal", "en", "ru", "uk"]) rmSync(d, { recursive: true, force: true });   // en/ru/uk – остатък от старата версия
-mkdirSync("apteka"); mkdirSync("kvartal");
+for (const d of ["apteka", "kvartal", "en", "ru", "uk"]) rmSync(d, { recursive: true, force: true });
+mkdirSync("apteka");
+for (const l of LANGS) mkdirSync(dirOf(l) + "kvartal", { recursive: true });
 
-// ---------- страница на всяка аптека ----------
+// ---------- страница на всяка аптека (български; другите езици – с JS) ----------
 for (const p of list) {
   const title = tl("bg", "pg.title", { name: p.name, addr: p.address }), desc = descr(p);
-  writeFileSync(`apteka/${p.slug}.html`, shell(`data-kind="pharmacy" data-id="${p.id}"`,
-    `<title>${esc(title)}</title>\n<meta name="description" content="${esc(desc)}">\n${ogMeta(pageUrl(p), title, desc)}\n<meta name="robots" content="noindex, follow">\n${ld(pharmacyLd(p))}`,
-    R.pharmacyHtml(p, "bg", { root: "../" })));
+  writeFileSync(`apteka/${p.slug}.html`, shell("bg", "../", `data-kind="pharmacy" data-id="${p.id}"`,
+    `<title>${esc(title)}</title>\n<meta name="description" content="${esc(desc)}">\n${ogMeta("bg", pageUrl(p), title, desc)}\n<meta name="robots" content="noindex, follow">\n${ld(pharmacyLd(p))}`,
+    R.pharmacyHtml(p, "bg", { root: "../" }), "static.js"));
 }
 writeFileSync("data.json", JSON.stringify(list));
 console.log(`Генерирани ${list.length} аптеки.`);
 
-// ---------- страници по квартали ----------
+// ---------- страници по квартали – на 4 езика ----------
 const kvartali = R.buildKvartali(list);
-const kvUrl = k => BASE + `kvartal/${k.slug}.html`;
-for (const k of kvartali) {
-  const { name, ps } = k, faq = R.kvFaq(k, "bg");
-  const title = tl("bg", "kv.title", { q: name }), desc = tl("bg", "kv.desc", { q: name, n: R.pl("bg", ps.length), h24: ps.some(p => p.h24) ? tl("bg", "kv.desc24") : "" });
+const kvUrl = (k, l = "bg") => urlOf(l, `kvartal/${k.slug}.html`);
+for (const l of LANGS) for (const k of kvartali) {
+  const { ps } = k, q = I.quarter(l, k.name), faq = R.kvFaq(k, l), root = rootOf(l), kp = `kvartal/${k.slug}.html`;
+  const title = tl(l, "kv.title", { q }), desc = tl(l, "kv.desc", { q, n: R.pl(l, ps.length), h24: ps.some(p => p.h24) ? tl(l, "kv.desc24") : "" });
   const sorted = ps.slice().sort((a, b) => (b.h24 - a.h24) || a.name.localeCompare(b.name, "bg"));
-  writeFileSync(`kvartal/${k.slug}.html`, shell(`data-kind="kvartal" data-slug="${k.slug}"`,
-    `<title>${esc(title)}</title>\n<meta name="description" content="${esc(desc)}">\n${ogMeta(kvUrl(k), title, desc)}\n${ld({ "@context":"https://schema.org", "@graph":[
-      { "@type":"CollectionPage", name:title, url:kvUrl(k), inLanguage:"bg", dateModified:today, about:{ "@type":"Place", name:`${name}, Варна` } },
+  writeFileSync(dirOf(l) + kp, shell(l, root, `data-lang="${l}" data-page="${kp}"`,
+    `<title>${esc(title)}</title>\n<meta name="description" content="${esc(desc)}">\n${ogMeta(l, kvUrl(k, l), title, desc, kp)}\n${ld({ "@context":"https://schema.org", "@graph":[
+      { "@type":"CollectionPage", name:title, url:kvUrl(k, l), inLanguage:l, dateModified:today, about:{ "@type":"Place", name:`${q}, ${tl(l, "city")}` } },
       { "@type":"ItemList", numberOfItems:ps.length, itemListElement:sorted.map((p, i) => ({ "@type":"ListItem", position:i + 1, name:`${p.name} – ${p.address}`, url:pageUrl(p) })) },
-      { "@type":"BreadcrumbList", itemListElement:[{ "@type":"ListItem", position:1, name:"Аптеки във Варна", item:BASE }, { "@type":"ListItem", position:2, name:tl("bg", "kv.h1", { q: name }), item:kvUrl(k) }] },
+      { "@type":"BreadcrumbList", itemListElement:[{ "@type":"ListItem", position:1, name:tl(l, "index.title"), item:urlOf(l, "") }, { "@type":"ListItem", position:2, name:tl(l, "kv.h1", { q }), item:kvUrl(k, l) }] },
       ...(faq.length ? [{ "@type":"FAQPage", mainEntity:faq.map(f => ({ "@type":"Question", name:f.q, acceptedAnswer:{ "@type":"Answer", text:f.a } })) }] : [])
     ] })}`,
-    R.kvartalHtml(k, kvartali, "bg", { root: "../", kvInfo })));
+    R.kvartalHtml(k, kvartali, l, { root, kvInfo })));
 }
 
-// ---------- SEO за началната страница ----------
-const sub = (file, name, html) => {
-  const s = readFileSync(file, "utf8"), re = new RegExp(`<!--${name}-->[\\s\\S]*?<!--/${name}-->`);
-  if (!re.test(s)) throw new Error(`Липсва маркер ${name} във ${file}`);
-  writeFileSync(file, s.replace(re, () => `<!--${name}-->${html}<!--/${name}-->`));
+// ---------- начална страница и „Почивни дни“: версии на 4 езика ----------
+const subStr = (s, name, html) => {
+  const re = new RegExp(`<!--${name}-->[\\s\\S]*?<!--/${name}-->`);
+  if (!re.test(s)) throw new Error(`Липсва маркер ${name}`);
+  return s.replace(re, () => `<!--${name}-->${html}<!--/${name}-->`);
 };
 const open24 = list.filter(p => p.h24);
-const meta = (path, title, desc) => `<link rel="canonical" href="${esc(BASE + path)}">
-<meta name="description" content="${esc(desc)}">
-<meta property="og:type" content="website"><meta property="og:locale" content="bg_BG"><meta property="og:site_name" content="Аптеки във Варна">
-<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(BASE + path)}">
-<meta name="twitter:card" content="summary"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">`;
-sub("index.html", "META", meta("", "Аптеки във Варна – работно време, телефони и карта", `Всички аптеки във Варна: ${list.length} адреса с телефон, работно време и карта. Денонощни аптеки, отворени сега и най-близка до теб.`));
-sub("index.html", "LD", ld({ "@context":"https://schema.org", "@graph":[
-  { "@type":"WebSite", name:"Аптеки във Варна", url:BASE, inLanguage:"bg" },
-  { "@type":"ItemList", name:"Аптеки във Варна по квартали", numberOfItems:kvartali.length,
-    itemListElement:kvartali.map((k, i) => ({ "@type":"ListItem", position:i + 1, url:kvUrl(k), name:`Аптеки в ${k.name}` })) },
-  { "@type":"FAQPage", mainEntity:[
-    { "@type":"Question", name:"Кои са денонощните аптеки във Варна?", acceptedAnswer:{ "@type":"Answer", text:"Денонощни аптеки във Варна: " + open24.map(p => `${p.name} (${p.address}${p.phone ? ", тел. " + p.phone : ""})`).join("; ") + "." } },
-    { "@type":"Question", name:"Колко аптеки има в списъка?", acceptedAnswer:{ "@type":"Answer", text:`В сайта са събрани ${list.length} аптеки във Варна с адрес, телефон, работно време и карта.` } },
-    { "@type":"Question", name:"Как да намеря най-близката аптека?", acceptedAnswer:{ "@type":"Answer", text:"Натиснете бутона „Най-близка до мен“ и разрешете достъп до местоположението – аптеките се подреждат по разстояние." } }
-  ] } ] }));
-sub("index.html", "SEOLIST", `
-<section class="card seo" id="all-links">
-  <h2 data-i18n="seo.h">Аптеки във Варна по квартали</h2>
-  <p class="muted"><span data-i18n="seo.intro" data-vars='{"n":${list.length}}'>Каталог на ${list.length} аптеки във Варна с адрес, телефон и работно време по дни.</span> <span data-i18n="seo.h24">Денонощни аптеки:</span> ${open24.map(p => esc(p.name) + ", " + esc(p.address)).join("; ")}.</p>
-  <p>${kvartali.map(k => `<a data-href="kvartal/${k.slug}.html" data-q="${esc(k.name)}" data-count="${k.ps.length}" href="kvartal/${k.slug}.html">${esc(k.name)} (${k.ps.length})</a>`).join(" · ") || "Кварталите ще бъдат добавени скоро."}</p>
-</section>`);
-
-// ---------- SEO за страницата с почивните дни (3 години, статично) ----------
-const todayY = +today.slice(0, 4), years = [todayY - 1, todayY, todayY + 1];
-const fmt = d => `${d.getDate()} ${H.MON[d.getMonth()].toLowerCase()}`;
+const metaL = (l, path, title, desc) => `${ogMeta(l, urlOf(l, path), title, desc, path)}
+<meta name="description" content="${esc(desc)}"><meta property="og:site_name" content="${esc(tl(l, "index.title"))}"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">`;
+const todayY = +today.slice(0, 4), years = [todayY - 1, todayY, todayY + 1], yearsTxt = years.join(", ");
+const dm = (l, d) => I.dayMonth(l, d);
 const holIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-const yearBlocks = years.map(y => {
-  const hs = H.holidays(y), easter = H.orthodoxEaster(y), offs = hs.filter(h => h.off);
-  return { y, hs, easter, offs, school: H.schoolEvents(y).filter(e => e.kind === "vacation") };
-});
-sub("pochivni-dni.html", "META", meta("pochivni-dni.html", `Почивни дни ${years.join(", ")} в България – празници, учебни ваканции и отпуска`, `Официални почивни дни и празници в България за ${years.join(", ")}, учебни ваканции по МОН и най-изгодните комбинации за отпуска, за да почиваш по-дълго.`));
-const faqOf = ({ y, hs, easter, school }) => [
-  { q:`Кои са официалните почивни дни през ${y} г. в България?`, a: hs.map(h => `${fmt(h.date)} (${H.DOW[h.date.getDay()].toLowerCase()}) – ${h.name}`).join("; ") + "." },
-  { q:`Кога е Великден през ${y} г.?`, a:`Православният Великден през ${y} г. е на ${fmt(easter)} (${H.DOW[easter.getDay()].toLowerCase()}). Официалните почивни дни са от Велики петък до Великденски понеделник.` },
-  { q:`Кога са учебните ваканции през ${y} г.?`, a: school.map(e => `${e.name}: ${fmt(e.fromD)}${e.from === e.to ? "" : " – " + fmt(e.toD)}${e.toD.getFullYear() !== y ? " " + e.toD.getFullYear() : ""}`).join("; ") + "." }
+const holName = (l, y, h) => h.comp ? tl(l, "hol.comp", { dow: I.dowName(l, h.comp.dow).toLowerCase(), date: dm(l, new Date(y, h.comp.m, h.comp.d)) }) : I.name(l, h.name);
+const yearBlocks = years.map(y => ({ y, hs: H.holidays(y), easter: H.orthodoxEaster(y), school: H.schoolEvents(y).filter(e => e.kind === "vacation") }));
+const faqOf = (l, { y, hs, easter, school }) => [
+  { q: tl(l, "faq.q1", { y }), a: hs.map(h => `${dm(l, h.date)} (${I.dowName(l, h.date.getDay()).toLowerCase()}) – ${holName(l, y, h)}`).join("; ") + "." },
+  { q: tl(l, "faq.q2", { y }), a: tl(l, "faq.a2", { y, date: dm(l, easter), dow: I.dowName(l, easter.getDay()).toLowerCase() }) },
+  { q: tl(l, "faq.q3", { y }), a: school.map(e => `${I.name(l, e.name)}: ${dm(l, e.fromD)}${e.from === e.to ? "" : " – " + dm(l, e.toD)}${e.toD.getFullYear() !== y ? " " + e.toD.getFullYear() : ""}`).join("; ") + "." }
 ];
-const faqAll = yearBlocks.flatMap(faqOf);
-sub("pochivni-dni.html", "LD", ld({ "@context":"https://schema.org", "@graph":[
-  { "@type":"WebPage", name:"Почивни дни в България", url:BASE + "pochivni-dni.html", inLanguage:"bg", dateModified:today },
-  { "@type":"FAQPage", mainEntity: faqAll.map(f => ({ "@type":"Question", name:f.q, acceptedAnswer:{ "@type":"Answer", text:f.a } })) },
-  ...yearBlocks.flatMap(({ hs }) => hs.map(h => ({ "@type":"Event", name:h.name, startDate:holIso(h.date), endDate:holIso(h.date),
-    eventAttendanceMode:"https://schema.org/OfflineEventAttendanceMode", eventStatus:"https://schema.org/EventScheduled",
-    location:{ "@type":"Country", name:"България" } })))
-] }));
-// въпросите са в сгъваеми блокове (<details>), за да не заемат място; съдържанието им се индексира нормално
-sub("pochivni-dni.html", "SEOFAQ", `
-<section class="card seo" id="faq" data-bgonly>
-  <h2 data-i18n="faq.h">Често задавани въпроси за почивните дни</h2>
+
+function indexFill(s, l) {
+  const title = tl(l, "index.docTitle"), desc = tl(l, "index.desc", { n: list.length });
+  s = subStr(s, "META", metaL(l, "", title, desc));
+  s = subStr(s, "LD", ld({ "@context":"https://schema.org", "@graph":[
+    { "@type":"WebSite", name:tl(l, "index.title"), url:urlOf(l, ""), inLanguage:l },
+    { "@type":"ItemList", name:tl(l, "seo.h"), numberOfItems:kvartali.length,
+      itemListElement:kvartali.map((k, i) => ({ "@type":"ListItem", position:i + 1, url:kvUrl(k, l), name:tl(l, "kv.h1", { q:I.quarter(l, k.name) }) })) },
+    { "@type":"FAQPage", mainEntity:[
+      { "@type":"Question", name:tl(l, "idx.q1"), acceptedAnswer:{ "@type":"Answer", text:tl(l, "idx.a1", { list: open24.map(p => `${p.name} (${p.address}${p.phone ? ", " + p.phone : ""})`).join("; ") }) } },
+      { "@type":"Question", name:tl(l, "idx.q2"), acceptedAnswer:{ "@type":"Answer", text:tl(l, "idx.a2", { n: list.length }) } },
+      { "@type":"Question", name:tl(l, "idx.q3"), acceptedAnswer:{ "@type":"Answer", text:tl(l, "idx.a3") } }
+    ] } ] }));
+  s = subStr(s, "SEOLIST", `
+<section class="card seo" id="all-links">
+  <h2 data-i18n="seo.h">${esc(tl(l, "seo.h"))}</h2>
+  <p class="muted"><span data-i18n="seo.intro" data-vars='{"n":${list.length}}'>${esc(tl(l, "seo.intro", { n: list.length }))}</span> <span data-i18n="seo.h24">${esc(tl(l, "seo.h24"))}</span> ${open24.map(p => esc(p.name) + ", " + esc(p.address)).join("; ")}.</p>
+  <p>${kvartali.map(k => `<a data-href="kvartal/${k.slug}.html" data-q="${esc(k.name)}" data-count="${k.ps.length}" href="${dirOf(l)}kvartal/${k.slug}.html">${esc(I.quarter(l, k.name))} (${k.ps.length})</a>`).join(" · ")}</p>
+</section>`);
+  return { s, title };
+}
+function holFill(s, l) {
+  const title = tl(l, "hol.docTitle", { y: yearsTxt }), desc = tl(l, "hol.desc", { y: yearsTxt });
+  s = subStr(s, "META", metaL(l, "pochivni-dni.html", title, desc));
+  const faqAll = yearBlocks.flatMap(yb => faqOf(l, yb));
+  s = subStr(s, "LD", ld({ "@context":"https://schema.org", "@graph":[
+    { "@type":"WebPage", name:tl(l, "hol.title"), url:urlOf(l, "pochivni-dni.html"), inLanguage:l, dateModified:today },
+    { "@type":"FAQPage", mainEntity: faqAll.map(f => ({ "@type":"Question", name:f.q, acceptedAnswer:{ "@type":"Answer", text:f.a } })) },
+    ...yearBlocks.flatMap(({ y, hs }) => hs.map(h => ({ "@type":"Event", name:holName(l, y, h), startDate:holIso(h.date), endDate:holIso(h.date),
+      eventAttendanceMode:"https://schema.org/OfflineEventAttendanceMode", eventStatus:"https://schema.org/EventScheduled",
+      location:{ "@type":"Country", name:l === "bg" ? "България" : l === "en" ? "Bulgaria" : l === "ru" ? "Болгария" : "Болгарія" } })))
+  ] }));
+  // въпросите са в сгъваеми блокове (<details>), за да не заемат място; съдържанието им се индексира нормално
+  s = subStr(s, "SEOFAQ", `
+<section class="card seo" id="faq">
+  <h2 data-i18n="faq.h">${esc(tl(l, "faq.h"))}</h2>
   ${faqAll.map(f => `<details class="acc"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("\n  ")}
 </section>`);
+  return { s, title };
+}
+// за копията на други езици: превод на статичните текстове (data-i18n), заглавие, <html lang>, <base> и връзки в менюто
+function pretranslate(s, l) {
+  s = s.replace(/(<([a-z0-9]+)\b[^>]*\bdata-i18n="([^"]+)"[^>]*>)([^<]*)(<\/\2>)/g, (m, open, tag, key, old, close) => {
+    const v = I.T[key]; if (!v || typeof v[0] !== "string") return m;
+    const vm = open.match(/data-vars='([^']*)'/);
+    return open + esc(tl(l, key, vm ? JSON.parse(vm[1]) : undefined)) + close;
+  });
+  s = s.replace(/(<[^>]*\bdata-i18n-ph="([^"]+)"[^>]*\bplaceholder=")[^"]*(")/g, (m, a, key, z) => a + esc(tl(l, key)) + z);
+  return s;
+}
+function langCopy(src, l, title) {
+  let s = src.replace(/<html lang="bg" data-theme="auto" data-lang="bg"/, `<html lang="${l}" data-theme="auto" data-lang="${l}"`)
+    .replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`)
+    .replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<base href="../">')   // относителните връзки и файлове остават от корена на сайта
+    .replace('href="./" id="navHome"', `href="${l}/" id="navHome"`).replace('id="navHol"', 'id="navHol"').replace(/href="pochivni-dni\.html"( id="navHol")/, `href="${l}/pochivni-dni.html"$1`)
+    .replace(/<a class="on" href="\.\/" id="navHome"/, `<a class="on" href="${l}/" id="navHome"`);
+  return pretranslate(s, l);
+}
+for (const [file, fill] of [["index.html", indexFill], ["pochivni-dni.html", holFill]]) {
+  const src = readFileSync(file, "utf8");
+  const bg = fill(src, "bg");
+  writeFileSync(file, bg.s);                                   // българската версия остава в корена
+  for (const l of LANGS.filter(x => x !== "bg")) {
+    const r = fill(readFileSync(file, "utf8"), l);
+    writeFileSync(`${dirOf(l)}${file}`, langCopy(r.s, l, r.title));
+  }
+}
 
 // ---------- sitemap, robots, llms.txt ----------
-// страниците на отделните аптеки са noindex
-writeFileSync("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[
-  [BASE, "1.0"], [BASE + "pochivni-dni.html", "1.0"], ...kvartali.map(k => [kvUrl(k), "0.8"])
-].map(([u, pri]) => `  <url><loc>${esc(u)}</loc><lastmod>${today}</lastmod><priority>${pri}</priority></url>`).join("\n")}\n</urlset>\n`);
+// страниците на отделните аптеки са noindex; индексируемите страници са на 4 езика с hreflang
+const alt = path => LANGS.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${esc(urlOf(l, path))}"/>`).join("") + `<xhtml:link rel="alternate" hreflang="x-default" href="${esc(urlOf("bg", path))}"/>`;
+const smUrl = (l, path, pri) => `  <url><loc>${esc(urlOf(l, path))}</loc><lastmod>${today}</lastmod><priority>${pri}</priority>${alt(path)}</url>`;
+writeFileSync("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[
+  ...LANGS.map(l => smUrl(l, "", "1.0")), ...LANGS.map(l => smUrl(l, "pochivni-dni.html", "1.0")),
+  ...kvartali.flatMap(k => LANGS.map(l => smUrl(l, `kvartal/${k.slug}.html`, l === "bg" ? "0.8" : "0.7")))
+].join("\n")}\n</urlset>\n`);
 const urls = [BASE, BASE + "pochivni-dni.html", ...kvartali.map(k => kvUrl(k))];
 writeFileSync("robots.txt", `User-agent: *\nAllow: /\nDisallow: /admin.html\n\n# Разрешаваме и ИИ роботите да четат сайта\nUser-agent: GPTBot\nAllow: /\nUser-agent: ClaudeBot\nAllow: /\nUser-agent: PerplexityBot\nAllow: /\nUser-agent: Google-Extended\nAllow: /\nDisallow: /admin.html\n\nSitemap: ${BASE}sitemap.xml\n`);
 writeFileSync("llms.txt", `# Аптеки във Варна и почивни дни
