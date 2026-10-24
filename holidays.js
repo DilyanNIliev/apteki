@@ -31,7 +31,7 @@ function holidays(y) {
     let d = addDays(h.date, 1);
     while ([0,6].includes(d.getDay()) || taken.has(iso(d))) d = addDays(d, 1);
     taken.add(iso(d));
-    out.push({ date:d, iso:iso(d), name:"Почивен ден – компенсация за празник в " + DOW[h.date.getDay()].toLowerCase() + " (" + h.date.getDate() + " " + MON[h.date.getMonth()].toLowerCase() + ")", off:true });
+    out.push({ date:d, iso:iso(d), name:"Почивен ден – компенсация за празник в " + DOW[h.date.getDay()].toLowerCase() + " (" + h.date.getDate() + " " + MON[h.date.getMonth()].toLowerCase() + ")", off:true, comp:{ dow:h.date.getDay(), d:h.date.getDate(), m:h.date.getMonth() } });
   }
   for (const x of EXTRA[y] || []) { const d = new Date(x.date + "T00:00:00"); out.push({ date:d, iso:x.date, name:x.name, off:true }); }
   return out.sort((a,b) => a.date - b.date);
