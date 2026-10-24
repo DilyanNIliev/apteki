@@ -10,11 +10,9 @@ const isOpen = (p, now) => HoursLib.isOpen(p, now);
 
 // ---- език ----
 const ROOT_EL = document.documentElement;
-const STATIC_PAGE = ROOT_EL.dataset.static === "1";   // генерирана страница на конкретен език (apteka/, kvartal/)
 let LANG = "bg";
 (function initLang() {
   const ok = l => I18N.LANGS.includes(l);
-  if (STATIC_PAGE) { LANG = ok(ROOT_EL.lang) ? ROOT_EL.lang : "bg"; try { localStorage.setItem("lang", LANG); } catch (e) {} return; }
   let l = new URLSearchParams(location.search).get("lang");
   if (!ok(l)) { try { l = localStorage.getItem("lang"); } catch (e) { l = null; } }
   LANG = ok(l) ? l : "bg";
@@ -23,7 +21,6 @@ let LANG = "bg";
 })();
 const tt = (key, vars) => I18N.t(LANG, key, vars);
 const nameL = bg => I18N.name(LANG, bg);                 // имена на празници / събития
-const langPrefix = () => LANG === "bg" ? "" : LANG + "/";  // за връзки към генерираните страници
 const withLang = url => LANG === "bg" ? url : url + (url.includes("?") ? "&" : "?") + "lang=" + LANG;   // за връзки към динамичните страници
 
 function applyI18n(scope) {
@@ -37,10 +34,6 @@ function applyI18n(scope) {
 function setLang(l) {
   if (!I18N.LANGS.includes(l) || l === LANG) return;
   try { localStorage.setItem("lang", l); } catch (e) {}
-  if (STATIC_PAGE) {              // отиваме на същата страница на другия език
-    location.href = ROOT_EL.dataset.root + (l === "bg" ? "" : l + "/") + ROOT_EL.dataset.page;
-    return;
-  }
   LANG = l; ROOT_EL.lang = l;
   try { const u = new URL(location.href); u.searchParams.delete("lang"); history.replaceState(null, "", u); } catch (e) {}
   applyI18n();

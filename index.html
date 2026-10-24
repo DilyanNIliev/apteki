@@ -117,7 +117,7 @@ function render() {
   if (user) items = items.slice().sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity));
   $("list").innerHTML = items.length ? items.map(p => {
     const open = isOpen(p, now);
-    const page = langPrefix() + "apteka/" + p.slug + ".html";
+    const page = "apteka/" + p.slug + ".html";
     return `<article class="card">
       <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2></div>
       <div>${open === true ? `<span class="badge">${tt("badge.open")}</span>` : open === false ? `<span class="badge closed">${tt("badge.closed")}</span>` : ""}
@@ -143,7 +143,7 @@ function fillQuarters() {
   $("kv").value = cur;
 }
 function fixStaticLinks() {                  // връзки към генерираните страници – с езика на посетителя
-  document.querySelectorAll("a[data-href]").forEach(a => { a.href = langPrefix() + a.dataset.href; });
+  
   document.querySelectorAll("a[data-q]").forEach(a => { a.textContent = I18N.quarter(LANG, a.dataset.q) + " (" + a.dataset.count + ")"; });
   const h = $("navHol"); if (h) h.href = "pochivni-dni.html";
 }
