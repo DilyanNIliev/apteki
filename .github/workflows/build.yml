@@ -2,7 +2,7 @@ name: Rebuild pharmacy pages
 on:
   push:
     branches: [main]
-    paths: [data/pharmacies.txt, data/overrides.json, data/kvartali.json, build.mjs, holidays.js, hours.js]
+    paths: [data/pharmacies.txt, data/overrides.json, data/kvartali.json, build.mjs, holidays.js, hours.js, i18n.js, render.js, index.html, pochivni-dni.html]
   schedule:
     - cron: "17 3 1 * *"   # веднъж месечно – обновява годините и датите в SEO текстовете
   workflow_dispatch:

@@ -16,7 +16,13 @@
     if (o.suOff) d[0] = null; else if (o.suOpen && o.suClose) d[0] = [o.suOpen, o.suClose];
     return d;
   }
-  const dayText = v => v === undefined ? "" : v === null ? "почивен" : v[0] + "–" + v[1];
+  const OFF = "\u0000off";
+  const dayText = v => v === undefined ? "" : v === null ? OFF : v[0] + "–" + v[1];
+  const I = () => root.I18N;
+  const tr = (lang, key, vars) => I() ? I().t(lang || "bg", key, vars) : key;
+  const short = (lang, d) => I() ? I().dowShort(lang || "bg", d) : SHORT[d];
+  const long = (lang, d) => I() ? I().dowName(lang || "bg", d) : LONG[d];
+  const fmt = (lang, t) => t === OFF ? tr(lang, "h.off") : t;
 
   // групира последователни дни с еднакво време: "Пн–Пт 08:00–20:00, Сб 09:00–14:00, Нд почивен"
   function groups(days) {
@@ -29,13 +35,13 @@
     }
     return out;
   }
-  function summary(p) {
-    if (p.closedTemp) return "Временно затворена";
-    if (p.h24) return "Денонощно";
+  function summary(p, lang) {
+    if (p.closedTemp) return tr(lang, "closedTemp");
+    if (p.h24) return tr(lang, "h.24");
     const g = groups(p.days || {});
-    if (g.length === 1 && g[0].start === 1 && g[0].end === 0) return "Всеки ден " + g[0].t;
-    if (g.length) return g.map(x => (x.start === x.end ? SHORT[x.start] : SHORT[x.start] + "–" + SHORT[x.end]) + " " + x.t).join(", ");
-    return p.close ? "Затваря в " + p.close + " ч." : "—";
+    if (g.length === 1 && g[0].start === 1 && g[0].end === 0) return tr(lang, "h.every") + " " + fmt(lang, g[0].t);
+    if (g.length) return g.map(x => (x.start === x.end ? short(lang, x.start) : short(lang, x.start) + "–" + short(lang, x.end)) + " " + fmt(lang, x.t)).join(", ");
+    return p.close ? tr(lang, "h.closesAt", { c: p.close }) : "—";
   }
   // true / false, или null ако няма данни за днешния ден
   function isOpen(p, now) {
@@ -56,12 +62,12 @@
   const EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   function schemaHours(p) {          // за JSON-LD
     if (p.h24) return [{ "@type":"OpeningHoursSpecification", dayOfWeek:EN, opens:"00:00", closes:"23:59" }];
-    return groups(p.days || {}).filter(g => g.t !== "почивен").map(g => {
+    return groups(p.days || {}).filter(g => g.t !== OFF).map(g => {
       const [opens, closes] = g.t.split("–");
       const idx = []; for (let i = ORDER.indexOf(g.start); ; i = (i + 1) % 7) { idx.push(ORDER[i]); if (ORDER[i] === g.end) break; }
       return { "@type":"OpeningHoursSpecification", dayOfWeek:idx.map(i => EN[i]), opens, closes };
     });
   }
-  root.HoursLib = { SHORT, LONG, ORDER, toMin, buildDays, dayText, summary, isOpen, schemaHours };
+  root.HoursLib = { SHORT, LONG, ORDER, toMin, buildDays, dayText, summary, isOpen, schemaHours, long, OFF, tr };
   if (typeof module !== "undefined") module.exports = root.HoursLib;
 })(typeof window !== "undefined" ? window : globalThis);
