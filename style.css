@@ -113,3 +113,10 @@ button.primary { border-radius:999px; padding:10px 18px; font-weight:600; }
 .seo h2 { font-size:1.1rem; } .seo h3 { font-size:1rem; margin:16px 0 4px; color:var(--accent); }
 .linklist { columns:2 280px; column-gap:24px; padding-left:18px; margin:8px 0 0; font-size:.9rem; color:var(--muted); }
 .linklist li { break-inside:avoid; margin:2px 0; }
+.hours { border-collapse:collapse; width:100%; max-width:360px; }
+.hours td { padding:3px 0; border-bottom:1px solid var(--line); } .hours td:first-child { color:var(--muted); width:140px; }
+.tablewrap { overflow-x:auto; }
+table.list { border-collapse:collapse; width:100%; min-width:640px; font-size:.95rem; }
+table.list th { text-align:left; color:var(--muted); font-weight:600; padding:8px 10px; border-bottom:2px solid var(--line); }
+table.list td { padding:10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.list tr:last-child td { border-bottom:0; }
