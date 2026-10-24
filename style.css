@@ -132,3 +132,9 @@ table.list tr:last-child td { border-bottom:0; }
 .btn.fix:hover { box-shadow:0 2px 10px color-mix(in srgb, var(--leave) 45%, transparent); }
 table.list .actions { margin:0; padding:0; border:0; flex-wrap:nowrap; }
 .fix.card { border-left:4px solid var(--leave); }
+
+/* --- повече разстояние между бутоните --- */
+.actions { gap:12px 14px; }
+.links { gap:12px 16px; }
+.btn, .actions a { margin:2px 0; }
+table.list .actions { gap:10px; }
