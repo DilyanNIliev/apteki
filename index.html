@@ -116,7 +116,7 @@ function render() {
     const open = isOpen(p, now);
     const page = "apteka/" + p.slug + ".html";
     return `<article class="card">
-      <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2><div class="links"><a href="${esc(page)}">Подробности и карта →</a></div></div>
+      <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2><div class="links"><a href="${esc(page)}">Подробности и карта →</a><a href="korekciya.html?id=${p.id}">Предложи корекция</a></div></div>
       <div>${open === true ? '<span class="badge">Отворено</span>' : open === false ? '<span class="badge closed">Затворено</span>' : ""}
         ${p.h24 ? '<span class="badge alt">24ч</span>' : ""}${p.compound ? '<span class="badge alt">Приготвя лекарства</span>' : ""}${p.holiday ? '<span class="badge alt">Работи на празници</span>' : ""}</div>
       <div class="facts"><div class="row"><b>Адрес:</b> ${esc(p.address)}${p.dist != null ? ` · ${p.dist.toFixed(1)} км` : ""}</div>
