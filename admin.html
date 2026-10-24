@@ -16,6 +16,8 @@
   .edit .chk { display:flex; flex-direction:row; align-items:center; gap:6px; color:var(--text); font-size:.9rem; }
   .card.changed { border-color:var(--accent); }
   .tokenCard { margin-bottom:12px; } .tokenCard summary { cursor:pointer; }
+  .hours { display:grid; gap:6px; } .hrow { display:flex; gap:6px; align-items:center; } .hrow b { width:64px; font-size:.85rem; }
+  .hrow select { width:auto; min-width:78px; }
   .bar { position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 0; border-bottom:1px solid var(--line); }
   .bulk { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   textarea.json { width:100%; height:160px; font:12px/1.4 monospace; background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; }
@@ -41,11 +43,12 @@
     <div class="controls">
       <input type="search" id="q" placeholder="Търси по име, адрес, телефон или №…">
       <label><input type="checkbox" id="fSite"> Липсва сайт (има в Google)</label>
-      <label><input type="checkbox" id="fOpen"> Липсва час на отваряне</label>
+      <label><input type="checkbox" id="fOpen"> Липсва час на отваряне (Пн–Пт)</label>
+      <label><input type="checkbox" id="fKv"> Без квартал</label>
       <label><input type="checkbox" id="fChanged"> Само променените</label>
     </div>
     <div class="bulk">
-      <span>Общ час на отваряне за всички без такъв:</span>
+      <span>Общ час на отваряне (Пн–Пт) за всички без такъв:</span>
       <span id="bulkOpenBox"></span>
       <button type="button" id="bulkApply">Приложи</button>
       <span style="flex:1"></span>
@@ -66,9 +69,11 @@
 </main>
 <script src="common.js"></script>
 <script>
-const FIELDS = ["name","address","phone","open","close","website","gmaps","lat","lon","note"];
-const BOOLS = ["compound","holiday"];
-const LABEL = { name:"Име", address:"Адрес", phone:"Телефон", open:"Отваря в", close:"Затваря в", website:"Уебсайт (https://…)", gmaps:"Линк за упътвания (Google Maps)", lat:"Ширина (lat)", lon:"Дължина (lon)", note:"Бележка", compound:"Приготвя лекарства", holiday:"Работи на празници" };
+const FIELDS = ["name","address","kvartal","phone","website","gmaps","lat","lon","note"];
+const TIMEKEYS = ["wdOpen","wdClose","saOpen","saClose","suOpen","suClose"];
+const BOOLS = ["compound","holiday","saOff","suOff"];
+const HROWS = [["Пн–Пт","wdOpen","wdClose",null],["Събота","saOpen","saClose","saOff"],["Неделя","suOpen","suClose","suOff"]];
+const LABEL = { name:"Име", address:"Адрес", kvartal:"Квартал", phone:"Телефон", website:"Уебсайт (https://…)", gmaps:"Линк за упътвания (Google Maps)", lat:"Ширина (lat)", lon:"Дължина (lon)", note:"Бележка", compound:"Приготвя лекарства", holiday:"Работи на празници" };
 const $ = id => document.getElementById(id);
 // час само през 15 минути (00, 15, 30, 45)
 const TIMES = Array.from({ length: 96 }, (_, i) => String(Math.floor(i / 4)).padStart(2, "0") + ":" + String((i % 4) * 15).padStart(2, "0"));
@@ -80,6 +85,14 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 let base = [], saved = {}, draft = {};   // saved = текущият overrides.json, draft = промени от този браузър
 
 try { draft = JSON.parse(localStorage.getItem("draft") || "{}"); } catch (e) {}
+function migrate(m) {     // стари полета open/close = часове за Пн–Пт
+  for (const o of Object.values(m)) {
+    if (o && "open" in o) { if (!o.wdOpen) o.wdOpen = o.open; delete o.open; }
+    if (o && "close" in o) { if (!o.wdClose) o.wdClose = o.close; delete o.close; }
+  }
+  return m;
+}
+migrate(draft);
 const persist = () => { try { localStorage.setItem("draft", JSON.stringify(draft)); } catch (e) {} };
 const merged = id => ({ ...(saved[id] || {}), ...(draft[id] || {}) });
 const val = (p, k) => { const m = merged(p.id); return k in m ? m[k] : (p[k] ?? ""); };
@@ -88,7 +101,7 @@ function cleaned() {            // overrides.json: без празни стой�
   const out = {};
   for (const p of base) {
     const m = merged(p.id), o = {};
-    for (const k of [...FIELDS, ...BOOLS]) {
+    for (const k of [...FIELDS, ...TIMEKEYS, ...BOOLS]) {
       const v = m[k];
       if (v === undefined || v === "" || v === false || v === null) continue;
       o[k] = k === "lat" || k === "lon" ? Number(String(v).replace(",", ".")) : v;
@@ -104,17 +117,23 @@ function render() {
   const items = base.filter(p =>
     (p.id + " " + p.name + " " + p.address + " " + p.phone).toLowerCase().includes(q) &&
     (!$("fSite").checked || (p.hasSite && !val(p, "website"))) &&
-    (!$("fOpen").checked || !val(p, "open")) &&
+    (!$("fOpen").checked || (!p.h24 && !val(p, "wdOpen"))) &&
+    (!$("fKv").checked || !val(p, "kvartal")) &&
     (!$("fChanged").checked || (draft[p.id] && Object.keys(draft[p.id]).length)));
   $("status").textContent = "Показани " + items.length + " от " + base.length + " · променени в тази чернова: " + changedCount();
   $("list").innerHTML = items.map(p => `
     <article class="card ${draft[p.id] && Object.keys(draft[p.id]).length ? "changed" : ""}" data-id="${p.id}">
       <h2>№${p.id} · ${esc(val(p, "name"))} ${p.hasSite && !val(p, "website") ? '<span class="badge alt">има сайт</span>' : ""}</h2>
       <div class="row">${esc(val(p, "address"))}</div>
+      ${p.close ? `<div class="row">По Google: затваря в ${esc(p.close)} ч.</div>` : ""}
       <div class="edit">
         ${FIELDS.map(k => `<label class="${["note","gmaps","website","address","name"].includes(k) ? "wide" : ""}">${LABEL[k]}
-          ${k === "open" || k === "close" ? timeSelect(`data-k="${k}"`, val(p, k)) : `<input type="text" data-k="${k}" value="${esc(val(p, k))}">`}</label>`).join("")}
-        ${BOOLS.map(k => `<label class="chk"><input type="checkbox" data-k="${k}" ${val(p, k) || (k === "holiday" && p.h24) ? "checked" : ""}> ${LABEL[k]}</label>`).join("")}
+          <input type="text" data-k="${k}" value="${esc(val(p, k))}" ${k === "kvartal" ? 'list="kvlist"' : ""}></label>`).join("")}
+        <div class="wide hours">
+          ${HROWS.map(([lab, o, c, off]) => `<div class="hrow"><b>${lab}</b>${timeSelect(`data-k="${o}"`, val(p, o))}<span>–</span>${timeSelect(`data-k="${c}"`, val(p, c))}${off ? `<label class="chk"><input type="checkbox" data-k="${off}" ${val(p, off) ? "checked" : ""}> почивен</label>` : ""}</div>`).join("")}
+          <button type="button" data-copy="1">Пн–Пт → Сб и Нд</button>
+        </div>
+        ${["compound","holiday"].map(k => `<label class="chk"><input type="checkbox" data-k="${k}" ${val(p, k) || (k === "holiday" && p.h24) ? "checked" : ""}> ${LABEL[k]}</label>`).join("")}
       </div>
     </article>`).join("");
 }
@@ -128,14 +147,23 @@ $("list").addEventListener("change", e => {
   card.classList.add("changed");
   $("status").textContent = "Променени в тази чернова: " + changedCount();
 });
-["q","fSite","fOpen","fChanged"].forEach(id => $(id).addEventListener("input", render));
+$("list").addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"), card = e.target.closest("[data-id]");
+  if (!b || !card) return;
+  const p = base.find(x => x.id === card.dataset.id), d = (draft[p.id] ||= {});
+  const o = val(p, "wdOpen"), c = val(p, "wdClose");
+  if (!o || !c) { alert("Първо попълни часовете за Пн–Пт."); return; }
+  Object.assign(d, { saOpen:o, saClose:c, suOpen:o, suClose:c, saOff:false, suOff:false });
+  persist(); render();
+});
+["q","fSite","fOpen","fKv","fChanged"].forEach(id => $(id).addEventListener("input", render));
 
 $("bulkApply").onclick = () => {
   const t = $("bulkOpen").value;
   if (!t) { alert("Първо избери час."); return; }
-  const targets = base.filter(p => !p.h24 && !val(p, "open"));
+  const targets = base.filter(p => !p.h24 && !val(p, "wdOpen"));
   if (!confirm("Ще сложа отваряне в " + t + " на " + targets.length + " аптеки без такова. Продължаваш ли?")) return;
-  for (const p of targets) (draft[p.id] ||= {}).open = t;
+  for (const p of targets) (draft[p.id] ||= {}).wdOpen = t;
   persist(); render();
 };
 // ---- запис директно в GitHub (Contents API) ----
@@ -197,7 +225,10 @@ $("bulkOpenBox").innerHTML = timeSelect('id="bulkOpen"', "");
 Promise.all([
   fetch("data.json").then(r => r.json()),
   fetch("data/overrides.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
-]).then(([d, o]) => { base = d; saved = o; delete saved["_пояснение"]; render(); })
+]).then(([d, o]) => { base = d; saved = migrate(o); delete saved["_пояснение"];
+  const ks = [...new Set(d.map(p => p.kvartal).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bg"));
+  document.body.insertAdjacentHTML("beforeend", `<datalist id="kvlist">${ks.map(k => `<option value="${esc(k)}">`).join("")}</datalist>`);
+  render(); })
   .catch(() => { $("status").textContent = "Данните не могат да се заредят."; });
 </script>
 </body>
