@@ -41,9 +41,15 @@
   function isOpen(p, now) {
     if (p.closedTemp) return false;
     if (p.h24) return true;
-    const t = (p.days || {})[now.day];
+    const days = p.days || {}, t = days[now.day];
     if (t === null) return false;
-    if (!t) return null;
+    if (!t) {
+      // Няма часове за днес. Нощем (преди 06:00) аптеките са затворени; ако знаем само часа на затваряне (по Google),
+      // след него също е затворено. Иначе не твърдим нищо.
+      if (now.min < 360) return false;
+      if (p.close && !Object.keys(days).length && now.min >= toMin(p.close)) return false;
+      return null;
+    }
     const o = toMin(t[0]), c = toMin(t[1]);
     return c > o ? now.min >= o && now.min < c : now.min >= o || now.min < c;
   }

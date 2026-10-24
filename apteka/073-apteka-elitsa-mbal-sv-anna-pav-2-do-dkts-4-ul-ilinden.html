@@ -48,7 +48,7 @@
 <script src="../hours.js"></script>
 <script src="../common.js"></script>
 <script>
-const p = {"days":{},"h24":false,"closedTemp":false};
+const p = {"days":{},"close":"19:30","h24":false,"closedTemp":false};
 const st = isOpen(p, sofiaNow());
 document.getElementById("state").innerHTML = st === true ? '<span class="badge">Отворено</span>' : st === false ? '<span class="badge closed">Затворено</span>' : "";
 </script>

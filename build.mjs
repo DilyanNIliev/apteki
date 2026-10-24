@@ -135,7 +135,7 @@ ${theme}
 <script src="../hours.js"></script>
 <script src="../common.js"></script>
 <script>
-const p = ${JSON.stringify({ days:p.days, h24:p.h24, closedTemp:p.closedTemp }).replace(/</g, "\\u003c")};
+const p = ${JSON.stringify({ days:p.days, close:p.close, h24:p.h24, closedTemp:p.closedTemp }).replace(/</g, "\\u003c")};
 const st = isOpen(p, sofiaNow());
 document.getElementById("state").innerHTML = st === true ? '<span class="badge">Отворено</span>' : st === false ? '<span class="badge closed">Затворено</span>' : "";
 </script>
