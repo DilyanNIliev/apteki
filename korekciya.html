@@ -16,6 +16,7 @@
   textarea { min-height:90px; }
   .hrow { display:flex; gap:6px; align-items:center; margin:4px 0; } .hrow b { width:70px; font-size:.9rem; color:var(--text); } .hrow select { width:auto; min-width:80px; }
   .opts { display:flex; gap:8px; flex-wrap:wrap; } .opts label { display:flex; flex-direction:row; align-items:center; gap:6px; color:var(--text); background:var(--card); border:1px solid var(--line); border-radius:999px; padding:6px 12px; }
+  .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   #result { display:none; } #result textarea { min-height:160px; font:13px/1.4 monospace; }
 </style>
 </head>
@@ -59,6 +60,8 @@
         <label>Телефон или имейл<input type="text" id="cinfo"></label>
         <p class="note">Контактите се използват само за проверка на корекцията и не се публикуват.</p>
       </fieldset>
+      <label class="hp" aria-hidden="true">Не попълвай това поле<input type="text" id="website2" tabindex="-1" autocomplete="off"></label>
+      <label>Проверка, че си човек: <span id="q"></span> = ? <input type="text" id="ans" inputmode="numeric" autocomplete="off" style="max-width:120px"></label>
       <div class="links">
         <button type="submit" class="primary" id="send">Изпрати корекцията</button>
         <button type="button" id="copy">Копирай текста</button>
@@ -91,6 +94,27 @@ Promise.all([
   $("how").textContent = cfg.contactEmail ? "Корекцията се изпраща по имейл (ще се отвори пощата ти)." : "Корекцията се изпраща като публично съобщение в GitHub – не пиши лични данни. (Собственикът на сайта може да зададе имейл.)";
 });
 
+// --- защита от спам ---
+// Формата не публикува нищо сама: изпращането минава през пощата или GitHub профила на подателя, така че ботове не могат да пишат директно.
+// Тук отсяваме и автоматични натискания: скрито поле, минимално време, въпрос, ограничение на честотата и на линковете.
+const born = Date.now(), A = 2 + Math.floor(Math.random() * 8), B = 2 + Math.floor(Math.random() * 8);
+$("q").textContent = A + " + " + B;
+const LIMIT_MS = 60000, LIMIT_DAY = 5;
+function spamProblem() {
+  if ($("website2").value) return "Невалидно изпращане.";
+  if (Date.now() - born < 4000) return "Изчакай няколко секунди и опитай пак.";
+  if (+$("ans").value.trim() !== A + B) return "Отговорът на проверката не е верен.";
+  const text = [...document.querySelectorAll("input[type=text],textarea")].filter(e => e.id !== "website2" && e.id !== "out").map(e => e.value).join(" ");
+  if (text.length > 2000) return "Текстът е твърде дълъг.";
+  if ((text.match(/https?:\/\//gi) || []).length > 2) return "Твърде много линкове.";
+  try {
+    const log = JSON.parse(localStorage.getItem("fixLog") || "[]").filter(t => Date.now() - t < 864e5);
+    if (log.length && Date.now() - log[log.length - 1] < LIMIT_MS) return "Моля, изчакай минута преди следващото изпращане.";
+    if (log.length >= LIMIT_DAY) return "Достигнат е дневният лимит за изпращане.";
+    localStorage.setItem("fixLog", JSON.stringify([...log, Date.now()]));
+  } catch (e) {}
+  return "";
+}
 function build() {
   const L = [];
   L.push(`Корекция за аптека ${ph ? `№${ph.id}: ${ph.name} – ${ph.address}, Варна` : "(непосочена)"}`);
@@ -117,6 +141,8 @@ $("copy").onclick = async () => {
 };
 $("f").addEventListener("submit", e => {
   e.preventDefault();
+  const bad = spamProblem();
+  if (bad) { alert(bad); return; }
   const t = build();
   if (t.split("\n").length <= 2) { alert("Попълни поне едно поле, което искаш да се промени."); return; }
   $("out").value = t; $("result").style.display = "block";
