@@ -1,4 +1,4 @@
-// Общи помощни функции: тема и "отворено сега" (по часа и деня в България).
+// Общи помощни функции: часове, тема и език (BG / EN / RU / UK).
 const toMin = t => { const [h,m] = t.split(":").map(Number); return h*60+m; };
 function sofiaNow() {
   const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone:"Europe/Sofia", weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false })
@@ -7,14 +7,83 @@ function sofiaNow() {
 }
 // true / false, или null ако няма данни за днешния ден (виж hours.js)
 const isOpen = (p, now) => HoursLib.isOpen(p, now);
-(function theme() {
-  const root = document.documentElement, btn = document.getElementById("theme");
-  const eff = () => root.dataset.theme === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : root.dataset.theme;
-  const paint = () => { btn.textContent = eff() === "dark" ? "☀️ Дневен" : "🌙 Нощен"; };
-  btn.onclick = () => {
-    root.dataset.theme = eff() === "dark" ? "light" : "dark";
-    try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
-    paint();
-  };
-  paint();
+
+// ---- език ----
+const ROOT_EL = document.documentElement;
+// Страници с езикови версии (индексируеми): data-page = път от корена ("" за началната), data-lang = езикът на тази версия.
+// Останалите страници (аптеки, корекция) се превеждат в браузъра по запомнения език.
+const SITE_ROOT = ROOT_EL.dataset.root || "";             // относителен път до корена на сайта
+const PAGE_PATH = ROOT_EL.dataset.page;                   // undefined = страница без езикови версии
+const dirOfLang = l => (l === "bg" ? "" : l + "/");
+let LANG = "bg";
+(function initLang() {
+  const ok = l => I18N.LANGS.includes(l);
+  let stored = null; try { stored = localStorage.getItem("lang"); } catch (e) {}
+  if (PAGE_PATH !== undefined) {
+    const pageLang = ok(ROOT_EL.dataset.lang) ? ROOT_EL.dataset.lang : "bg";
+    // български адрес, а посетителят е избрал друг език – пренасочваме автоматично към неговата версия
+    if (pageLang === "bg" && ok(stored) && stored !== "bg") { location.replace(SITE_ROOT + dirOfLang(stored) + PAGE_PATH + location.search + location.hash); return; }
+    LANG = pageLang;
+  } else {
+    let l = new URLSearchParams(location.search).get("lang");
+    if (!ok(l)) l = stored;
+    LANG = ok(l) ? l : "bg";
+  }
+  try { localStorage.setItem("lang", LANG); } catch (e) {}
+  ROOT_EL.lang = LANG;
 })();
+const tt = (key, vars) => I18N.t(LANG, key, vars);
+const nameL = bg => I18N.name(LANG, bg);                 // имена на празници / събития
+const idxHref = (path, l) => SITE_ROOT + dirOfLang(l || LANG) + path;      // връзка към индексируема страница на текущия език
+const withLang = url => LANG === "bg" ? url : url + (url.includes("?") ? "&" : "?") + "lang=" + LANG;   // за връзки към динамичните страници
+
+function applyI18n(scope) {
+  const q = (sel) => (scope || document).querySelectorAll(sel);
+  q("[data-i18n]").forEach(e => { e.textContent = tt(e.dataset.i18n, e.dataset.vars ? JSON.parse(e.dataset.vars) : undefined); });
+  q("[data-i18n-ph]").forEach(e => { e.placeholder = tt(e.dataset.i18nPh); });
+  q("[data-i18n-aria]").forEach(e => { e.setAttribute("aria-label", tt(e.dataset.i18nAria)); });
+  paintTheme(); paintLang(); fixNav();
+}
+function setLang(l) {
+  if (!I18N.LANGS.includes(l) || l === LANG) return;
+  try { localStorage.setItem("lang", l); } catch (e) {}
+  if (PAGE_PATH !== undefined) { location.href = SITE_ROOT + dirOfLang(l) + PAGE_PATH; return; }   // отиваме на езиковата версия на страницата
+  LANG = l; ROOT_EL.lang = l;
+  try { const u = new URL(location.href); u.searchParams.delete("lang"); history.replaceState(null, "", u); } catch (e) {}
+  applyI18n();
+  if (typeof onLangChange === "function") onLangChange();
+}
+function fixNav() {                       // връзките към индексируемите страници водят към версията на текущия език
+  const h = document.getElementById("navHome"), p = document.getElementById("navHol");
+  if (h) h.href = idxHref(""); if (p) p.href = idxHref("pochivni-dni.html");
+  document.querySelectorAll("a[data-idx]").forEach(a => { a.href = idxHref(a.dataset.idx); });
+}
+
+// ---- тема (дневен / нощен) ----
+function effTheme() { return ROOT_EL.dataset.theme === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : ROOT_EL.dataset.theme; }
+function paintTheme() {
+  const b = document.getElementById("theme"); if (!b) return;
+  b.textContent = tt(effTheme() === "dark" ? "theme.day" : "theme.night"); b.setAttribute("aria-label", tt("theme.aria"));
+}
+(function themeInit() {
+  const btn = document.getElementById("theme");
+  if (btn) btn.onclick = () => {
+    ROOT_EL.dataset.theme = effTheme() === "dark" ? "light" : "dark";
+    try { localStorage.setItem("theme", ROOT_EL.dataset.theme); } catch (e) {}
+    paintTheme();
+  };
+})();
+
+// ---- превключвател на езика (горе вдясно) ----
+function paintLang() {
+  const box = document.getElementById("lang");
+  if (!box) return;
+  const m = I18N.META[LANG];
+  box.innerHTML = `<details class="langsw"><summary aria-label="${tt("lang.aria")}"><span class="fl">${m.flag}</span> ${m.abbr} ▾</summary><div class="menu">${
+    I18N.LANGS.map(l => `<button type="button" data-l="${l}" class="${l === LANG ? "on" : ""}"><span class="fl">${I18N.META[l].flag}</span> ${I18N.META[l].abbr} <small>${I18N.META[l].name}</small></button>`).join("")
+  }</div></details>`;
+  box.querySelectorAll("button[data-l]").forEach(b => b.onclick = () => { box.querySelector("details").open = false; setLang(b.dataset.l); });
+}
+document.addEventListener("click", e => { const d = document.querySelector(".langsw[open]"); if (d && !d.contains(e.target)) d.open = false; });
+document.addEventListener("DOMContentLoaded", () => applyI18n());
+if (document.readyState !== "loading") applyI18n();
