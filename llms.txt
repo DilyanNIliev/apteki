@@ -159,6 +159,9 @@
 - [Аптека Невен](https://dilyanniliev.github.io/apteki/apteka/141-apteka-neven-ul-krastyu-mirski-11a.html): ул. Кръстю Мирски 11А, 052 600 204
 - [Аптека Европа](https://dilyanniliev.github.io/apteki/apteka/142-apteka-evropa-ul-nish-33.html): ул. Ниш 33 – Временно затворена
 
+## Езици
+- [Български](https://dilyanniliev.github.io/apteki/), [English](https://dilyanniliev.github.io/apteki/en/), [Русский](https://dilyanniliev.github.io/apteki/ru/), [Українська](https://dilyanniliev.github.io/apteki/uk/)
+
 ## Бележки
 - Часът на затваряне е по данни от Google Maps; часовете на отваряне се допълват ръчно. Проверявайте по телефона.
 - Почивните дни са по Кодекса на труда (чл. 154) и решенията на Министерския съвет; учебните ваканции – по заповеди на МОН.

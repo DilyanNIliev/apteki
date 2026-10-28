@@ -61,6 +61,26 @@
     return out;
   }
 
+  // карта на аптека в списъка на началната страница. env = { root, open (true/false/null), dist (км, по избор) }
+  function cardHtml(p, l, env) {
+    const r = env.root, page = `${r}apteka/${p.slug}.html`, o = env.open;
+    const map = p.gmaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ", " + p.address + ", Варна")}`;
+    return `<article class="card">
+      <div class="head"><h2><a href="${esc(page)}">${esc(p.name)}</a></h2></div>
+      <div>${o === true ? `<span class="badge">${esc(tl(l, "badge.open"))}</span>` : o === false ? `<span class="badge closed">${esc(tl(l, "badge.closed"))}</span>` : ""}
+        ${p.h24 ? `<span class="badge alt">${esc(tl(l, "yes24"))}</span>` : ""}${p.compound ? `<span class="badge alt">${esc(tl(l, "badge.compound"))}</span>` : ""}${p.holiday ? `<span class="badge alt">${esc(tl(l, "badge.holiday"))}</span>` : ""}</div>
+      <div class="facts"><div class="row"><b>${esc(tl(l, "lbl.address"))}:</b> ${esc(p.address)}${env.dist != null ? ` · ${env.dist.toFixed(1)} ${esc(tl(l, "km"))}` : ""}</div>
+      <div class="row"><b>${esc(tl(l, "lbl.hours"))}:</b> ${esc(HL().summary(p, l))}</div>
+      <div class="row"><b>${esc(tl(l, "lbl.phone"))}:</b> ${p.phone ? `<a href="tel:${esc(telOf(p.phone))}">${esc(p.phone)}</a>` : "—"}</div>
+      </div>
+      <div class="actions">
+        <a class="btn sm" href="${esc(page)}">${esc(tl(l, "btn.more"))}</a>
+        <a class="btn sm ghost" href="${esc(map)}" target="_blank" rel="noopener">${esc(tl(l, "btn.map"))}</a>
+        <a class="btn sm fix" href="${esc(fixUrl(p, l, r))}">${esc(tl(l, "btn.fix"))}</a>
+      </div>
+    </article>`;
+  }
+
   function pharmacyHtml(p, l, env) {
     const r = env.root, ix = r + dir(l), tel = telOf(p.phone || "");
     return `<header>
@@ -105,6 +125,6 @@
 </main>`;
   }
 
-  root.Render = { esc, slugify, pl, dirUrl, embedUrl, hoursHtml, buildKvartali, kvIntro, kvFaq, pharmacyHtml, kvartalHtml };
+  root.Render = { esc, slugify, pl, dirUrl, embedUrl, hoursHtml, buildKvartali, kvIntro, kvFaq, cardHtml, pharmacyHtml, kvartalHtml };
   if (typeof module !== "undefined") module.exports = root.Render;
 })(typeof window !== "undefined" ? window : globalThis);
