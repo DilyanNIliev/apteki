@@ -26,7 +26,7 @@ let LANG = "bg";
 
 const tt = (key, vars) => I18N.t(LANG, key, vars);
 const nameL = bg => I18N.name(LANG, bg);                              // имена на празници и събития
-const idxHref = (path, l) => SITE_ROOT + langDir(l || LANG) + path;    // връзка към страница с езикови версии
+const idxHref = (path, l) => (SITE_ROOT + langDir(l || LANG) + path) || "./";    // връзка към страница с езикови версии („./“, а не празен адрес – той би сочил към същата страница)
 const withLang = url => LANG === "bg" ? url : url + (url.includes("?") ? "&" : "?") + "lang=" + LANG;   // към страница, която се превежда с JS
 
 // превод на статичните текстове: data-i18n (текст), data-i18n-ph (placeholder), data-i18n-aria (aria-label)
