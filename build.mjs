@@ -97,12 +97,12 @@ ${theme}
 </head>
 <body>
 <div class="layout">
-<aside class="ad" data-i18n="ad">${esc(tl(l, "ad"))}</aside>
+<aside class="side" aria-hidden="true"></aside>
 <div class="content">
 <nav class="nav"><a class="on" href="${root}${dirOf(l)}" data-idx="" data-i18n="nav.pharm">${esc(tl(l, "nav.pharm"))}</a><a href="${root}${dirOf(l)}pochivni-dni.html" data-idx="pochivni-dni.html" data-i18n="nav.hol">${esc(tl(l, "nav.hol"))}</a><button id="theme" type="button"></button><div id="lang"></div></nav>
 <div id="app">${inner}</div>
 </div>
-<aside class="ad" data-i18n="ad">${esc(tl(l, "ad"))}</aside>
+<aside class="side" aria-hidden="true"></aside>
 </div>
 ${scripts.map(s => `<script src="${root}${s}"></script>`).join("\n")}
 </body>
